@@ -1,0 +1,34 @@
+{
+  "name": "ForgeKeeper",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "args": {
+      "FORGEKEEPER_USER_EMAIL": "${localEnv:FORGEKEEPER_USER_EMAIL}",
+      "FORGEKEEPER_HANDLE": "${localEnv:FORGEKEEPER_HANDLE}",
+      "FORGEKEEPER_WORKSPACE": "${localEnv:FORGEKEEPER_WORKSPACE}"
+    }
+  },
+  "runArgs": ["--privileged"],
+  "remoteUser": "dev",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces,type=bind,consistency=cached",
+  "workspaceFolder": "/workspaces",
+  "forwardPorts": [7000, 8080, 3000, 7681, 8888, 5000, 6006],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+  "postCreateCommand": "just bootstrap || true",
+  "portsAttributes": {
+    "7000": { "label": "ForgeKeeper Portal" },
+    "8080": { "label": "VS Code Server" },
+    "3000": { "label": "OpenVSCode" },
+    "7681": { "label": "ttyd" },
+    "8888": { "label": "JupyterLab" },
+    "5000": { "label": "MLflow" },
+    "6006": { "label": "TensorBoard" }
+  }
+}

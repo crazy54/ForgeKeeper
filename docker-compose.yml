@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  forgekeeper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        FORGEKEEPER_USER_EMAIL: ${FORGEKEEPER_USER_EMAIL:-dev@example.com}
+        FORGEKEEPER_HANDLE: ${FORGEKEEPER_HANDLE:-forgekeeper}
+        FORGEKEEPER_WORKSPACE: ${FORGEKEEPER_WORKSPACE:-workspace}
+    image: forgekeeper:latest
+    container_name: forgekeeper
+    privileged: true
+    volumes:
+      - ./:/workspaces
+    ports:
+      - "7000:7000"
+      - "8080:8080"
+      - "3000:3000"
+      - "7681:7681"
+      - "8888:8888"
+      - "5000:5000"
+      - "6006:6006"
+    environment:
+      - FORGEKEEPER_USER_EMAIL=${FORGEKEEPER_USER_EMAIL:-dev@example.com}
+      - FORGEKEEPER_HANDLE=${FORGEKEEPER_HANDLE:-forgekeeper}
+      - FORGEKEEPER_WORKSPACE=${FORGEKEEPER_WORKSPACE:-workspace}
+    command: ["sleep", "infinity"]

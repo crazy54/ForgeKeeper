@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForgeKeeper Control Surface</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" type="image/png" href="logo/Forge.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="splash" class="splash">
+    <div class="splash-content">
+      <img src="logo/Forge.png" alt="ForgeKeeper logo" class="splash-logo" />
+      <h1 id="typewriter" class="typewriter"></h1>
+      <p class="splash-subtitle" id="splash-subtitle">Bringing Tools Online. Please Wait...</p>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glow-bg"></div>
+  <div class="logo-watermark" aria-hidden="true">
+    <img src="logo/Forge.png" alt="ForgeKeeper watermark" />
+    <img src="logo/Forge.png" alt="ForgeKeeper watermark" />
+  </div>
+
+  <header class="forge-header">
+    <div class="brand">
+      <img src="logo/Forge.png" alt="ForgeKeeper" />
+      <div>
+        <h1>ForgeKeeper Control Surface</h1>
+        <p>Browser launch pad for every hosted environment.</p>
+      </div>
+    </div>
+    <button class="power-btn" id="shutdown-btn" title="Shutdown container">
+      <span></span>
+      <small>POWER</small>
+    </button>
+  </header>
+
+  <main class="forge-main">
+    <section class="hero-card">
+      <div>
+        <p class="eyebrow">Always-on Portal</p>
+        <h2>Every ForgeKeeper experience in one dashboard.</h2>
+        <p>Bookmark this page to discover new hosted tools, quickly jump into your IDE, or reset the environment when it's time for a fresh build.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#services">View Hosted Apps</a>
+          <a class="btn ghost" href="https://github.com" target="_blank" rel="noreferrer">Project Docs</a>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <img src="logo/Forge.png" alt="ForgeKeeper sigil" class="hero-meta-logo" />
+        <p>Current Workspace</p>
+        <h3 id="workspace-name">forgekeeper</h3>
+        <p class="meta-sub">Operator: <span id="user-email">ops@forgekeeper</span></p>
+      </div>
+    </section>
+
+    <section class="service-panel" id="services">
+      <div class="section-heading">
+        <h2>Hosted Interfaces</h2>
+        <p>Launch anything from full IDEs to diagnostic consoles.</p>
+      </div>
+      <div class="service-grid" id="service-grid"></div>
+    </section>
+
+    <section class="controls-panel">
+      <div>
+        <h2>Container Controls</h2>
+        <p>Need a clean slate or ready to stop the runtime? Use the controls below.</p>
+      </div>
+      <div class="control-actions">
+        <button class="btn danger" id="reset-btn">Reset &amp; Clear Data</button>
+        <button class="btn warning" id="shutdown-inline">Power Down Container</button>
+      </div>
+      <p class="control-disclaimer">These actions call ForgeKeeper control endpoints (<code>/forgekeeper/control</code>). Wire them to your orchestration layer to complete the workflow.</p>
+    </section>
+
+    <section class="updates-panel">
+      <h2>Latest Drops</h2>
+      <ul>
+        <li><strong>ForgeKeeper Portal</strong> — new launch pad on port 7000 with animated intro.</li>
+        <li><strong>code-server 1.89</strong> — full VS Code refresh with Copilot chat baked in.</li>
+        <li><strong>ttyd</strong> — browser-based zsh with ForgeKeeper banner personalization.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="forge-footer">
+    <p>&copy; <span id="year"></span> ForgeKeeper · Built for container-native developers.</p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
