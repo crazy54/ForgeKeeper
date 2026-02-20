@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
   <img src="https://img.shields.io/badge/devcontainer-compatible-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="Dev Container" />
   <img src="https://img.shields.io/badge/portal-port%207000-FF6B35?style=for-the-badge&logo=firefoxbrowser&logoColor=white" alt="Portal Port 7000" />
+  <img src="https://img.shields.io/badge/Docker%20Hub-forgekeeper-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Hub" />
 </p>
 
 <p align="center">
@@ -45,7 +46,64 @@
 
 ---
 
-## Table of Contents
+## Project Structure
+
+```
+forgekeeper/
+├── Dockerfile                  # Base image (no language runtimes)
+├── docker-compose.yml
+├── devcontainer.json
+├── dockerfiles/                # Language module snippets
+│   ├── lang-python.dockerfile
+│   ├── lang-node.dockerfile
+│   ├── lang-go.dockerfile
+│   ├── lang-rust.dockerfile
+│   ├── lang-java.dockerfile
+│   ├── lang-dotnet.dockerfile
+│   ├── lang-ruby.dockerfile
+│   ├── lang-php.dockerfile
+│   ├── lang-swift.dockerfile
+│   └── lang-dart.dockerfile
+├── portal/                     # In-container web portal (port 7000)
+│   ├── index.html
+│   ├── app.js
+│   ├── styles.css
+│   ├── config.js
+│   └── server.py               # Portal HTTP server + API endpoints
+├── setup-ui/                   # Setup wizard UI (shared Flow A + B)
+│   ├── index.html
+│   ├── setup.js
+│   └── setup.css
+├── scripts/
+│   ├── setup.py                # Flow A: pre-build wizard server (host)
+│   ├── install-lang.sh         # Runtime installer (inside container)
+│   └── forgekeeper-control.sh  # Shutdown / reset control script
+├── logo/
+│   └── Forge.png
+└── .github/workflows/
+    └── docker-publish.yml      # Auto-publish to Docker Hub on push
+```
+
+---
+
+## Setup Wizard
+
+### Flow A — Pre-build (source)
+
+`python3 scripts/setup.py` spins up a local server on port `7001`, opens your browser, and walks you through:
+
+- Identity (handle, email, workspace)
+- Language picker (only selected runtimes are compiled in)
+- Credentials (written to `.env` on your host, never baked into the image)
+- Build trigger (assembles `Dockerfile.built` and runs `docker compose up --build`)
+
+### Flow B — First-run (pre-built image)
+
+The portal server checks for `/etc/forgekeeper/.setup-complete` on every request to `/`. If missing, it redirects to `/setup`. The same wizard UI runs inside the container, POSTs config to `/forgekeeper/setup`, writes `/etc/forgekeeper/env`, installs selected language runtimes via `forgekeeper-runtime`, and marks setup complete.
+
+Resetting the container wipes `.setup-complete` so the wizard runs again on next boot.
+
+---
 
 - [ForgeKeeper](#forgekeeper)
   - [Table of Contents](#table-of-contents)
@@ -114,23 +172,56 @@
 
 ## Quick Start
 
+There are two ways to get ForgeKeeper running depending on whether you want to build from source or pull a pre-built image.
+
+### Flow A — Build from source (recommended)
+
+Run the interactive setup wizard on your host. It collects your config, lets you pick which language runtimes to include, writes `.env`, assembles a lean custom `Dockerfile.built`, then builds and starts the container — all from a browser UI.
+
 ```bash
-# Clone and boot the full stack
 git clone <your-repo-url> forgekeeper
 cd forgekeeper
-
-# Personalize (optional)
-export FORGEKEEPER_USER_EMAIL="you@example.com"
-export FORGEKEEPER_HANDLE="yourhandle"
-export FORGEKEEPER_WORKSPACE="myproject"
-
-# Build and run
-docker compose up --build forgekeeper
+python3 scripts/setup.py
 ```
 
-Then open [http://localhost:7000](http://localhost:7000) — the ForgeKeeper Portal.
+Your browser opens automatically at [http://localhost:7001](http://localhost:7001). Walk through the 4-step wizard:
 
-> **VS Code users:** Open the folder in VS Code and select **Reopen in Container** when prompted.
+1. Identity — handle, email, workspace name
+2. Languages — pick only what you need (Python, Node, Go, Rust, Java, .NET, Ruby, PHP, Swift, Dart)
+3. Credentials — API keys, GitHub token, AWS region (all optional, stored in `.env` only)
+4. Build — hit "Build Container" and watch the live log
+
+Once built, the portal is at [http://localhost:7000](http://localhost:7000).
+
+> **VS Code users:** Open the folder and select **Reopen in Container** after the build completes.
+
+### Flow B — Pre-built image from Docker Hub
+
+Pull the base image (no language runtimes baked in — lean by default) and run it. On first load the portal redirects to the setup wizard automatically.
+
+```bash
+docker pull forgekeeper/forgekeeper:latest
+docker run -d \
+  -p 7000:7000 -p 8080:8080 -p 7681:7681 \
+  -p 11434:11434 -p 8085:8085 \
+  --name forgekeeper \
+  forgekeeper/forgekeeper:latest
+```
+
+Open [http://localhost:7000](http://localhost:7000) — the setup wizard runs on first boot, collects your config, and installs your chosen language runtimes into the running container. No rebuild needed.
+
+### Adding languages after setup
+
+From the portal — open the **Language Runtimes** panel and click Install/Remove on any runtime.
+
+From the CLI inside the container:
+
+```bash
+forgekeeper-runtime install python
+forgekeeper-runtime install go
+forgekeeper-runtime remove ruby
+forgekeeper-runtime list
+```
 
 ---
 

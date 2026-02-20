@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForgeKeeper Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+  <link rel="stylesheet" href="setup.css" />
+</head>
+<body>
+
+  <!-- ── Cinematic intro overlay ─────────────────────────────────────────── -->
+  <div id="intro" class="intro" aria-live="polite">
+    <div class="intro-logo-wrap">
+      <img id="intro-logo" src="logo/Forgekeeper.svg" alt="ForgeKeeper" class="intro-logo" />
+    </div>
+    <div class="intro-text-wrap">
+      <p id="intro-line" class="intro-line"><span id="intro-typed"></span><span class="cursor" id="intro-cursor">|</span></p>
+    </div>
+  </div>
+
+  <!-- ── Background logo (visible after intro, pulsing glow) ────────────── -->
+  <div class="bg-logo" aria-hidden="true">
+    <img src="logo/Forgekeeper.svg" alt="" />
+  </div>
+
+  <!-- ── Setup wizard (hidden until intro completes) ────────────────────── -->
+  <div id="wizard-wrap" class="wizard-wrap" aria-hidden="true">
+    <div class="wizard-shell">
+      <header class="wiz-header">
+        <img src="logo/Forgekeeper.svg" alt="ForgeKeeper" class="wiz-logo" />
+        <div>
+          <h1>ForgeKeeper Setup</h1>
+          <p id="step-label">Step 1 of 4 — Identity</p>
+        </div>
+      </header>
+
+      <div class="step-track">
+        <div class="step-dot active" data-step="1"></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="2"></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="3"></div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="4"></div>
+      </div>
+
+      <!-- Step viewport — clips sliding steps -->
+      <div class="step-viewport" id="step-viewport">
+
+      <!-- Step 1: Identity -->
+      <section class="step active" id="step-1">
+        <h2>Who are you?</h2>
+        <p class="step-desc">These values personalize your shell banner, MOTD, and container labels.</p>
+        <div class="field-group">
+          <label>Handle / Username
+            <input type="text" id="handle" placeholder="yourhandle" autocomplete="off" />
+          </label>
+          <label>Email
+            <input type="email" id="email" placeholder="you@example.com" autocomplete="off" />
+          </label>
+          <label>Workspace Name
+            <input type="text" id="workspace" placeholder="my-project" autocomplete="off" />
+          </label>
+        </div>
+      </section>
+
+      <!-- Step 2: Languages -->
+      <section class="step" id="step-2">
+        <h2>Which languages do you need?</h2>
+        <p class="step-desc">Only selected runtimes will be compiled into the image — keeping it lean. You can add more later from the portal or CLI.</p>
+        <div class="lang-grid" id="lang-grid"></div>
+      </section>
+
+      <!-- Step 3: Credentials -->
+      <section class="step" id="step-3">
+      <!-- Forging overlay — shown while submitConfig() is in flight -->
+      <div class="forging-overlay" id="forging-overlay" aria-live="polite" hidden>
+        <div class="forging-spinner">
+          <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="30" cy="30" r="26" stroke="rgba(255,107,44,0.15)" stroke-width="4"/>
+            <path class="forge-arc" d="M30 4 A26 26 0 0 1 56 30" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="forging-quip" id="forging-quip"></p>
+      </div>
+        <h2>Credentials <span class="optional-tag">all optional</span></h2>
+        <p class="step-desc">Stored in <code>.env</code> on your host — never baked into the image. Leave blank to skip.</p>
+        <div class="field-group">
+          <label>Git User Name
+            <input type="text" id="git_name" placeholder="Your Name" autocomplete="off" />
+          </label>
+          <label>Git Email
+            <input type="email" id="git_email" placeholder="you@example.com" autocomplete="off" />
+          </label>
+          <label>GitHub Token
+            <input type="password" id="github_token" placeholder="ghp_..." autocomplete="off" />
+          </label>
+          <label>OpenAI API Key
+            <input type="password" id="openai_key" placeholder="sk-..." autocomplete="off" />
+          </label>
+          <label>Anthropic API Key
+            <input type="password" id="anthropic_key" placeholder="sk-ant-..." autocomplete="off" />
+          </label>
+          <label>AWS Default Region
+            <input type="text" id="aws_region" placeholder="us-east-1" autocomplete="off" />
+          </label>
+        </div>
+      </section>
+
+      <!-- Step 4: Build -->
+      <section class="step" id="step-4">
+        <h2>Ready to forge</h2>
+        <p class="step-desc">Your config has been saved to <code>.env</code> and a custom <code>Dockerfile.built</code> has been assembled. Hit the button to build your container.</p>
+        <div class="summary-box" id="summary-box"></div>
+        <button class="btn primary build-btn" id="build-btn">
+          <span id="build-btn-text">🔥 Forge Container 🔨</span>
+        </button>
+        <p class="cleanup-status" id="cleanup-status" style="display:none"></p>
+        <div class="build-log-wrap" id="build-log-wrap" style="display:none">
+          <pre class="build-log" id="build-log"></pre>
+        </div>
+        <p class="build-done" id="build-done" style="display:none"></p>
+      </section>
+
+      </div><!-- /step-viewport -->
+
+      <div class="wiz-nav">
+        <button class="btn ghost" id="back-btn" style="visibility:hidden">← Back</button>
+        <button class="btn ghost danger-nav" id="cleanup-btn" style="display:none">🧹 Clean Up</button>
+        <button class="btn primary" id="next-btn">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="setup.js"></script>
+</body>
+</html>

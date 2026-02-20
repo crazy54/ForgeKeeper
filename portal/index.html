@@ -7,7 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="icon" type="image/png" href="logo/Forge.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Space Grotesk loaded async; system-ui fallback used if offline -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -81,13 +82,14 @@
       <p class="control-disclaimer">These actions call ForgeKeeper control endpoints (<code>/forgekeeper/control</code>). Wire them to your orchestration layer to complete the workflow.</p>
     </section>
 
-    <section class="updates-panel">
-      <h2>Latest Drops</h2>
-      <ul>
-        <li><strong>ForgeKeeper Portal</strong> — new launch pad on port 7000 with animated intro.</li>
-        <li><strong>code-server 1.89</strong> — full VS Code refresh with Copilot chat baked in.</li>
-        <li><strong>ttyd</strong> — browser-based zsh with ForgeKeeper banner personalization.</li>
-      </ul>
+    <section class="runtimes-panel" id="runtimes">
+      <div class="section-heading">
+        <h2>Language Runtimes</h2>
+        <p>Install or remove language toolchains without rebuilding the container.</p>
+      </div>
+      <div class="runtime-grid" id="runtime-grid">
+        <p class="loading-runtimes">Loading runtime status…</p>
+      </div>
     </section>
   </main>
 

@@ -41,6 +41,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Locale + base packages
 RUN locale-gen en_US.UTF-8 \
     && apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         apt-transport-https \
         ca-certificates \
@@ -218,13 +219,12 @@ RUN curl -fsSL https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_
 RUN su - ${USERNAME} -c "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y" \
     && su - ${USERNAME} -c "~/.cargo/bin/rustup component add rustfmt clippy" \
     && su - ${USERNAME} -c "~/.cargo/bin/rustup target add wasm32-unknown-unknown" \
-    && su - ${USERNAME} -c "~/.cargo/bin/cargo install --locked wasm-pack cargo-watch trunk tauri-cli procs cargo-nextest@0.9.125" \
-    && su - ${USERNAME} -c "~/.cargo/bin/cargo install --locked zellij@${ZELLIJ_VERSION}"
+    && su - ${USERNAME} -c "~/.cargo/bin/cargo install --locked wasm-pack cargo-watch trunk tauri-cli procs cargo-nextest@0.9.125"
 
 # Python tooling + Jupyter stack
 RUN su - ${USERNAME} -c "pipx install pipenv" \
     && su - ${USERNAME} -c "pipx install poetry" \
-    && su - ${USERNAME} -c "pipx install rye" \
+    && su - ${USERNAME} -c "pipx install --python python3.12 rye" \
     && su - ${USERNAME} -c "pipx install pre-commit" \
     && python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
     && python3 -m pip install --no-cache-dir jupyterlab notebook voila ipykernel black ruff flake8 mypy pytest pytest-cov ipywidgets jupyterlab-code-formatter jupyterlab-git pandas numpy scipy matplotlib seaborn plotly scikit-learn polars tensorflow torch torchvision torchaudio mlflow tensorboard pyspark sqlfluff[lint] \
@@ -326,9 +326,14 @@ RUN mkdir -p /usr/local/share/forgekeeper /etc/profile.d /var/log/forgekeeper /o
 COPY logo/ /usr/local/share/forgekeeper/logo/
 COPY portal/ /opt/forgekeeper/portal/
 COPY logo/ /opt/forgekeeper/portal/logo/
+COPY setup-ui/ /opt/forgekeeper/setup-ui/
+COPY dockerfiles/ /opt/forgekeeper/dockerfiles/
 COPY scripts/forgekeeper-control.sh /usr/local/bin/forgekeeper-control.sh
+COPY scripts/install-lang.sh /usr/local/bin/forgekeeper-runtime
 
 RUN chmod +x /usr/local/bin/forgekeeper-control.sh \
+    && chmod +x /usr/local/bin/forgekeeper-runtime \
+    && mkdir -p /etc/forgekeeper/langs \
     && cp /usr/local/share/forgekeeper/logo/Forge.png /opt/forgekeeper/portal/logo/Forge.png >/dev/null 2>&1 || true \
     && sed -i "s|__FORGEKEEPER_HANDLE__|${FORGEKEEPER_HANDLE}|g" /opt/forgekeeper/portal/config.js \
     && sed -i "s|__FORGEKEEPER_USER_EMAIL__|${FORGEKEEPER_USER_EMAIL}|g" /opt/forgekeeper/portal/config.js \

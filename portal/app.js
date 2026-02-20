@@ -1,10 +1,17 @@
+// Derive the host from the current page so links work whether accessed via
+// localhost, a LAN IP, a hostname, or a remote server — never hardcode localhost.
+const HOST = window.location.hostname || 'localhost';
+
+function serviceUrl(port) {
+  return `${window.location.protocol}//${HOST}:${port}`;
+}
+
 const services = [
   // ── IDEs & Editors ──────────────────────────────────────────────────────────
   {
     category: 'IDEs & Editors',
     name: 'VS Code Server',
     port: 8080,
-    url: 'http://localhost:8080',
     description: 'Full VS Code accessible from any browser.',
     icon: '🛠️',
   },
@@ -12,7 +19,6 @@ const services = [
     category: 'IDEs & Editors',
     name: 'OpenVSCode Server',
     port: 3000,
-    url: 'http://localhost:3000',
     description: 'Lightweight VS Code build direct from Microsoft sources.',
     icon: '🧭',
   },
@@ -22,7 +28,6 @@ const services = [
     category: 'Terminals',
     name: 'ttyd Terminal',
     port: 7681,
-    url: 'http://localhost:7681',
     description: 'Browser-based zsh/tmux session with personalized MOTD.',
     icon: '💻',
   },
@@ -30,7 +35,6 @@ const services = [
     category: 'Terminals',
     name: 'Wetty Terminal',
     port: 3002,
-    url: 'http://localhost:3002',
     description: 'SSH-over-HTTP terminal — full shell in a browser tab.',
     icon: '🖥️',
   },
@@ -40,7 +44,6 @@ const services = [
     category: 'Data & ML',
     name: 'JupyterLab',
     port: 8888,
-    url: 'http://localhost:8888',
     description: 'Data notebooks with ForgeKeeper kernels baked in.',
     icon: '📓',
   },
@@ -48,7 +51,6 @@ const services = [
     category: 'Data & ML',
     name: 'MLflow UI',
     port: 5000,
-    url: 'http://localhost:5000',
     description: 'Track experiments, parameters, and metrics.',
     icon: '📈',
   },
@@ -56,7 +58,6 @@ const services = [
     category: 'Data & ML',
     name: 'TensorBoard',
     port: 6006,
-    url: 'http://localhost:6006',
     description: 'Visualize training runs and scalars.',
     icon: '🧠',
   },
@@ -66,7 +67,6 @@ const services = [
     category: 'Database UIs',
     name: 'pgAdmin',
     port: 5050,
-    url: 'http://localhost:5050',
     description: 'Full-featured PostgreSQL administration and query tool.',
     icon: '🐘',
   },
@@ -74,7 +74,6 @@ const services = [
     category: 'Database UIs',
     name: 'Adminer',
     port: 8082,
-    url: 'http://localhost:8082',
     description: 'Lightweight DB admin for PostgreSQL, MySQL, SQLite, and more.',
     icon: '🗄️',
   },
@@ -82,7 +81,6 @@ const services = [
     category: 'Database UIs',
     name: 'RedisInsight',
     port: 8001,
-    url: 'http://localhost:8001',
     description: 'Visual browser and profiler for Redis data structures.',
     icon: '🔴',
   },
@@ -90,7 +88,6 @@ const services = [
     category: 'Database UIs',
     name: 'Mongo Express',
     port: 8081,
-    url: 'http://localhost:8081',
     description: 'Web-based MongoDB admin interface.',
     icon: '🍃',
   },
@@ -100,7 +97,6 @@ const services = [
     category: 'Observability',
     name: 'Grafana',
     port: 3001,
-    url: 'http://localhost:3001',
     description: 'Dashboards for metrics, logs, and traces from any source.',
     icon: '📊',
   },
@@ -108,7 +104,6 @@ const services = [
     category: 'Observability',
     name: 'Prometheus',
     port: 9090,
-    url: 'http://localhost:9090',
     description: 'Metrics scraping and alerting — query with PromQL.',
     icon: '🔥',
   },
@@ -116,7 +111,6 @@ const services = [
     category: 'Observability',
     name: 'Jaeger UI',
     port: 16686,
-    url: 'http://localhost:16686',
     description: 'Distributed tracing — visualize request flows across services.',
     icon: '🔭',
   },
@@ -124,7 +118,6 @@ const services = [
     category: 'Observability',
     name: 'Netdata',
     port: 19999,
-    url: 'http://localhost:19999',
     description: 'Real-time system performance: CPU, memory, disk, network.',
     icon: '⚡',
   },
@@ -134,7 +127,6 @@ const services = [
     category: 'Container & Infra',
     name: 'Portainer',
     port: 9000,
-    url: 'http://localhost:9000',
     description: 'Docker container management — start, stop, inspect, and log.',
     icon: '🐳',
   },
@@ -144,7 +136,6 @@ const services = [
     category: 'API & Docs',
     name: 'Swagger UI',
     port: 8083,
-    url: 'http://localhost:8083',
     description: 'Interactive OpenAPI documentation and live API testing.',
     icon: '📋',
   },
@@ -152,7 +143,6 @@ const services = [
     category: 'API & Docs',
     name: 'MkDocs',
     port: 8084,
-    url: 'http://localhost:8084',
     description: 'Live preview of your project documentation site.',
     icon: '📚',
   },
@@ -162,7 +152,6 @@ const services = [
     category: 'AI & LLMs',
     name: 'Open WebUI',
     port: 8085,
-    url: 'http://localhost:8085',
     description: 'ChatGPT-style UI for Ollama and any OpenAI-compatible API.',
     icon: '🤖',
   },
@@ -170,7 +159,6 @@ const services = [
     category: 'AI & LLMs',
     name: 'Ollama',
     port: 11434,
-    url: 'http://localhost:11434',
     description: 'Local LLM runtime — run Llama 3, Mistral, CodeLlama and more offline.',
     icon: '🦙',
   },
@@ -178,7 +166,6 @@ const services = [
     category: 'AI & LLMs',
     name: 'AnythingLLM',
     port: 3003,
-    url: 'http://localhost:3003',
     description: 'RAG-powered chat over your own documents and codebase.',
     icon: '📂',
   },
@@ -186,7 +173,6 @@ const services = [
     category: 'AI & LLMs',
     name: 'Flowise',
     port: 3004,
-    url: 'http://localhost:3004',
     description: 'Visual drag-and-drop LLM workflow and agent builder.',
     icon: '🔗',
   },
@@ -194,7 +180,6 @@ const services = [
     category: 'AI & LLMs',
     name: 'LiteLLM Proxy',
     port: 4000,
-    url: 'http://localhost:4000',
     description: 'Unified API gateway for OpenAI, Anthropic, Bedrock, Ollama and more.',
     icon: '🔀',
   },
@@ -204,7 +189,6 @@ const services = [
     category: 'Portal',
     name: 'ForgeKeeper Portal',
     port: 7000,
-    url: 'http://localhost:7000',
     description: 'You are here — bookmark for all hosted tooling.',
     icon: '🔥',
   },
@@ -255,6 +239,7 @@ function renderServices() {
     grid.className = 'category-grid';
 
     for (const svc of items) {
+      const url = serviceUrl(svc.port);
       const card = document.createElement('article');
       card.className = 'service-card';
       card.innerHTML = `
@@ -266,7 +251,7 @@ function renderServices() {
         <p class="service-desc">${svc.description}</p>
         <div class="service-meta">
           <span>Port ${svc.port}</span>
-          <a href="${svc.url}" target="_blank" rel="noreferrer">Open →</a>
+          <a href="${url}" target="_blank" rel="noreferrer">Open →</a>
         </div>
       `;
       grid.appendChild(card);
@@ -349,3 +334,98 @@ async function triggerControl(action) {
 renderServices();
 attachControls();
 runSplashSequence();
+
+// ── Runtime Manager ───────────────────────────────────────────────────────────
+
+const LANG_META = {
+  python: { name: 'Python',     icon: '🐍' },
+  node:   { name: 'Node.js',    icon: '🟩' },
+  go:     { name: 'Go',         icon: '🐹' },
+  rust:   { name: 'Rust',       icon: '🦀' },
+  java:   { name: 'Java / JVM', icon: '☕' },
+  dotnet: { name: '.NET / C#',  icon: '💜' },
+  ruby:   { name: 'Ruby',       icon: '💎' },
+  php:    { name: 'PHP',        icon: '🐘' },
+  swift:  { name: 'Swift',      icon: '🍎' },
+  dart:   { name: 'Dart',       icon: '🎯' },
+};
+
+async function loadRuntimes() {
+  const grid = document.getElementById('runtime-grid');
+  if (!grid) return;
+
+  try {
+    const res = await fetch('/forgekeeper/runtime/list');
+    if (!res.ok) throw new Error('unavailable');
+    const { langs } = await res.json();
+    renderRuntimes(langs);
+  } catch {
+    grid.innerHTML = '<p class="loading-runtimes">Runtime status unavailable — is the container running?</p>';
+  }
+}
+
+function renderRuntimes(langs) {
+  const grid = document.getElementById('runtime-grid');
+  grid.innerHTML = '';
+
+  for (const lang of langs) {
+    const meta = LANG_META[lang.id] || { name: lang.id, icon: '📦' };
+    const card = document.createElement('div');
+    card.className = 'runtime-card';
+    card.id = `runtime-card-${lang.id}`;
+    card.innerHTML = `
+      <div class="runtime-info">
+        <span class="runtime-icon">${meta.icon}</span>
+        <div>
+          <div class="runtime-name">${meta.name}</div>
+          <div class="runtime-status ${lang.installed ? 'installed' : 'available'}">
+            ${lang.installed ? '✓ Installed' : 'Not installed'}
+          </div>
+        </div>
+      </div>
+      <button
+        class="runtime-action ${lang.installed ? 'remove' : 'install'}"
+        data-lang="${lang.id}"
+        data-action="${lang.installed ? 'remove' : 'install'}"
+      >${lang.installed ? 'Remove' : 'Install'}</button>
+    `;
+    grid.appendChild(card);
+  }
+
+  grid.querySelectorAll('.runtime-action').forEach(btn => {
+    btn.addEventListener('click', () => triggerRuntime(btn.dataset.lang, btn.dataset.action));
+  });
+}
+
+async function triggerRuntime(lang, action) {
+  const btn = document.querySelector(`#runtime-card-${lang} .runtime-action`);
+  if (!btn) return;
+
+  const label = action === 'install' ? 'Installing' : 'Removing';
+  btn.disabled = true;
+  btn.textContent = `${label}…`;
+
+  try {
+    const res = await fetch('/forgekeeper/runtime', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, lang }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      // Refresh the runtime list to reflect new state
+      await loadRuntimes();
+    } else {
+      btn.disabled = false;
+      btn.textContent = action === 'install' ? 'Install' : 'Remove';
+      alert(`Failed: ${data.message || 'Unknown error'}`);
+    }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = action === 'install' ? 'Install' : 'Remove';
+    alert('Runtime endpoint unreachable.');
+  }
+}
+
+// Load runtime status after services render
+loadRuntimes();

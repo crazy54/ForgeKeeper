@@ -500,3 +500,87 @@ img {
     padding: 1.8rem;
   }
 }
+
+/* ── Runtimes Panel ──────────────────────────────────────────────────────────*/
+.runtimes-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+}
+
+.runtime-grid {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.loading-runtimes {
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+}
+
+.runtime-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1rem 1.2rem;
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.runtime-info {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.runtime-icon { font-size: 1.4rem; }
+
+.runtime-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.runtime-status {
+  font-size: 0.75rem;
+  margin-top: 0.1rem;
+}
+
+.runtime-status.installed { color: var(--success); }
+.runtime-status.available { color: var(--text-muted); }
+
+.runtime-action {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.runtime-action.install:hover {
+  background: rgba(44,212,161,0.15);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.runtime-action.remove:hover {
+  background: rgba(255,45,85,0.15);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.runtime-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

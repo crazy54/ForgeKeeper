@@ -38,6 +38,7 @@ services:
       - "3003:3003"
       - "3004:3004"
       - "4000:4000"
+      - "7001:7001"
     environment:
       - FORGEKEEPER_USER_EMAIL=${FORGEKEEPER_USER_EMAIL:-dev@example.com}
       - FORGEKEEPER_HANDLE=${FORGEKEEPER_HANDLE:-forgekeeper}
