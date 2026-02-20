@@ -38,21 +38,56 @@
 
 ## Table of Contents
 
-- [Vision & Pillars](#vision--pillars)
-- [Quick Start](#quick-start)
-- [Hosted Services](#hosted-services)
-- [Base Image & Layering](#base-image--layering)
-- [Core System Packages](#core-system-packages)
-- [Runtimes & Languages](#runtimes--languages)
-- [Container, Cloud & Infra Tooling](#container-cloud--infra-tooling)
-- [Observability & QA](#observability--qa)
-- [Local Services](#local-services)
-- [Developer Ergonomics](#developer-ergonomics)
-- [Inside-Container Workflows](#inside-container-workflows)
-- [Security & Compliance](#security--compliance)
-- [Performance & Caching](#performance--caching)
-- [Local Orchestration](#local-orchestration)
-- [Next Steps](#next-steps)
+- [ForgeKeeper](#forgekeeper)
+  - [Table of Contents](#table-of-contents)
+  - [Vision \& Pillars](#vision--pillars)
+  - [Quick Start](#quick-start)
+  - [Hosted Services](#hosted-services)
+    - [AI \& LLMs](#ai--llms)
+    - [IDEs \& Editors](#ides--editors)
+    - [Terminals](#terminals)
+    - [Data \& ML](#data--ml)
+    - [Database UIs](#database-uis)
+    - [Observability](#observability)
+    - [Container \& Infra](#container--infra)
+    - [API \& Docs](#api--docs)
+    - [Portal](#portal)
+    - [Portal Controls](#portal-controls)
+  - [Base Image \& Layering](#base-image--layering)
+  - [Core System Packages](#core-system-packages)
+  - [Runtimes \& Languages](#runtimes--languages)
+    - [JavaScript / TypeScript / Front-end](#javascript--typescript--front-end)
+    - [Python \& Data](#python--data)
+    - [Go](#go)
+    - [Rust](#rust)
+    - [JVM \& Polyglot](#jvm--polyglot)
+    - [.NET \& C#](#net--c)
+    - [Other Languages](#other-languages)
+  - [AI Tooling](#ai-tooling)
+    - [Hosted UIs](#hosted-uis)
+    - [Local LLM Runtime (Ollama)](#local-llm-runtime-ollama)
+    - [CLI AI Tools](#cli-ai-tools)
+    - [LiteLLM Proxy — unified API](#litellm-proxy--unified-api)
+  - [Container, Cloud \& Infra Tooling](#container-cloud--infra-tooling)
+    - [Containers \& Orchestration](#containers--orchestration)
+    - [HashiCorp Stack](#hashicorp-stack)
+    - [Cloud SDKs](#cloud-sdks)
+    - [IaC \& Policy](#iac--policy)
+  - [Observability \& QA](#observability--qa)
+  - [Local Services](#local-services)
+  - [Developer Ergonomics](#developer-ergonomics)
+    - [Shell \& Prompt](#shell--prompt)
+    - [Editors](#editors)
+    - [Git Experience](#git-experience)
+  - [Inside-Container Workflows](#inside-container-workflows)
+    - [Automation Scripts (`justfile`)](#automation-scripts-justfile)
+    - [Lifecycle Hooks (`devcontainer.json`)](#lifecycle-hooks-devcontainerjson)
+    - [Daily Developer Flow](#daily-developer-flow)
+    - [Branding \& Session Personalization](#branding--session-personalization)
+  - [Security \& Compliance](#security--compliance)
+  - [Performance \& Caching](#performance--caching)
+  - [Local Orchestration](#local-orchestration)
+  - [Next Steps](#next-steps)
 
 ---
 
@@ -93,6 +128,16 @@ Then open [http://localhost:7000](http://localhost:7000) — the ForgeKeeper Por
 ## Hosted Services
 
 Once the container is running, the following services are available:
+
+### AI & LLMs
+
+| Service | Port | Description |
+|---|---|---|
+| 🤖 **Open WebUI** | `8085` | ChatGPT-style UI for Ollama and any OpenAI-compatible API |
+| 🦙 **Ollama** | `11434` | Local LLM runtime — run Llama 3, Mistral, CodeLlama offline, no API key needed |
+| 📂 **AnythingLLM** | `3003` | RAG-powered chat over your own documents and codebase |
+| 🔗 **Flowise** | `3004` | Visual drag-and-drop LLM workflow and agent builder |
+| 🔀 **LiteLLM Proxy** | `4000` | Unified API gateway — one endpoint for OpenAI, Anthropic, Bedrock, Ollama |
 
 ### IDEs & Editors
 
@@ -267,6 +312,65 @@ Temurin JDK 21 + 17, `maven`, `gradle`, `coursier`, Kotlin compiler, Scala (via 
 | Elixir/Erlang | latest | via mise, `hex`, `rebar3` |
 | Swift | 5.10 | Full toolchain |
 | Dart | stable | SDK included |
+
+---
+
+## AI Tooling
+
+ForgeKeeper ships a full local AI stack — no API keys required to get started.
+
+### Hosted UIs
+
+| Tool | Port | Description |
+|---|---|---|
+| 🤖 **Open WebUI** | `8085` | ChatGPT-style interface connected to Ollama out of the box |
+| 📂 **AnythingLLM** | `3003` | RAG over your workspace — drop in docs, code, PDFs and chat with them |
+| 🔗 **Flowise** | `3004` | Visual LLM workflow builder — chain tools, agents, and memory without code |
+| 🔀 **LiteLLM Proxy** | `4000` | Single OpenAI-compatible endpoint that routes to any backend |
+
+### Local LLM Runtime (Ollama)
+
+Ollama starts automatically and serves models on port `11434`. Pull any model at runtime:
+
+```bash
+ollama pull llama3          # Meta Llama 3 8B — great all-rounder
+ollama pull codellama       # Code-focused Llama variant
+ollama pull mistral         # Mistral 7B — fast and capable
+ollama pull phi3            # Microsoft Phi-3 — small but punchy
+ollama pull deepseek-coder  # DeepSeek Coder — strong at code generation
+ollama list                 # see what's installed
+```
+
+Open WebUI auto-connects to Ollama — just open [http://localhost:8085](http://localhost:8085) and start chatting.
+
+### CLI AI Tools
+
+These are available in every shell session:
+
+```bash
+# Aider — AI pair programmer that edits your actual files
+aider --model ollama/codellama file.py
+aider --model gpt-4o file.py          # swap to OpenAI if key is set
+
+# llm — quick one-liners from the terminal
+llm "explain this bash script" < script.sh
+llm -m ollama/llama3 "write a Dockerfile for a Node app"
+
+# Fabric — run AI prompts as pipelines
+cat README.md | fabric --pattern summarize
+cat error.log | fabric --pattern explain_code
+```
+
+### LiteLLM Proxy — unified API
+
+All tools in the container can point to `http://localhost:4000` and get routed to whichever backend is configured. Set env vars to unlock cloud providers:
+
+```bash
+# .env or docker-compose environment
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+# Ollama is always available with no key
+```
 
 ---
 

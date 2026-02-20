@@ -404,7 +404,64 @@ stdout_logfile=/var/log/forgekeeper/portal.log
 stderr_logfile=/var/log/forgekeeper/portal.err.log
 EOSUP
 
-# Entrypoint printing banner then executing command
+# AI tooling — Ollama (local LLM runtime)
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+# AI tooling — Python-based: Aider, LiteLLM, Fabric, llm CLI, Open WebUI
+RUN python3 -m pip install --no-cache-dir \
+        aider-chat \
+        litellm[proxy] \
+        fabric-ai \
+        llm \
+        open-webui
+
+# AI tooling — Flowise (Node.js LLM workflow builder)
+RUN npm install -g flowise
+
+# Supervisor: Ollama
+RUN cat <<'EOSUP' > /etc/supervisor/conf.d/ollama.conf
+[program:ollama]
+command=/usr/local/bin/ollama serve
+environment=OLLAMA_HOST=0.0.0.0,HOME=/root
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/forgekeeper/ollama.log
+stderr_logfile=/var/log/forgekeeper/ollama.err.log
+EOSUP
+
+# Supervisor: Open WebUI (depends on Ollama)
+RUN cat <<'EOSUP' > /etc/supervisor/conf.d/open-webui.conf
+[program:open-webui]
+command=/usr/bin/env bash -lc "open-webui serve --host 0.0.0.0 --port 8085"
+environment=OLLAMA_BASE_URL=http://localhost:11434,WEBUI_AUTH=False
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/forgekeeper/open-webui.log
+stderr_logfile=/var/log/forgekeeper/open-webui.err.log
+EOSUP
+
+# Supervisor: LiteLLM proxy
+RUN cat <<'EOSUP' > /etc/supervisor/conf.d/litellm.conf
+[program:litellm]
+command=/usr/bin/env bash -lc "litellm --host 0.0.0.0 --port 4000 --model ollama/llama3"
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/forgekeeper/litellm.log
+stderr_logfile=/var/log/forgekeeper/litellm.err.log
+EOSUP
+
+# Supervisor: Flowise
+RUN cat <<EOSUP > /etc/supervisor/conf.d/flowise.conf
+[program:flowise]
+command=/usr/bin/env bash -lc "flowise start --port 3004 --host 0.0.0.0"
+user=${USERNAME}
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/forgekeeper/flowise.log
+stderr_logfile=/var/log/forgekeeper/flowise.err.log
+EOSUP
+
+
 RUN cat <<'EOENTRY' > /usr/local/bin/forgekeeper-entrypoint.sh
 #!/usr/bin/env bash
 set -e
@@ -417,7 +474,7 @@ EOENTRY
 
 RUN chmod +x /usr/local/bin/forgekeeper-entrypoint.sh
 
-EXPOSE 8080 3000 3001 3002 7000 7681 8001 8081 8082 8083 8084 8888 5000 5050 6006 9000 9090 16686 19999
+EXPOSE 8080 3000 3001 3002 7000 7681 8001 8081 8082 8083 8084 8085 8888 5000 5050 6006 9000 9090 11434 16686 19999 3003 3004 4000
 
 USER ${USERNAME}
 WORKDIR /workspaces

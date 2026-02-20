@@ -33,8 +33,17 @@ services:
       - "9090:9090"
       - "16686:16686"
       - "19999:19999"
+      - "11434:11434"
+      - "8085:8085"
+      - "3003:3003"
+      - "3004:3004"
+      - "4000:4000"
     environment:
       - FORGEKEEPER_USER_EMAIL=${FORGEKEEPER_USER_EMAIL:-dev@example.com}
       - FORGEKEEPER_HANDLE=${FORGEKEEPER_HANDLE:-forgekeeper}
       - FORGEKEEPER_WORKSPACE=${FORGEKEEPER_WORKSPACE:-workspace}
+      # AI — set these to use cloud providers via LiteLLM proxy (all optional)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OLLAMA_HOST=http://localhost:11434
     command: ["sleep", "infinity"]

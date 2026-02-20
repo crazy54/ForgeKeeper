@@ -157,6 +157,48 @@ const services = [
     icon: '📚',
   },
 
+  // ── AI & LLMs ────────────────────────────────────────────────────────────────
+  {
+    category: 'AI & LLMs',
+    name: 'Open WebUI',
+    port: 8085,
+    url: 'http://localhost:8085',
+    description: 'ChatGPT-style UI for Ollama and any OpenAI-compatible API.',
+    icon: '🤖',
+  },
+  {
+    category: 'AI & LLMs',
+    name: 'Ollama',
+    port: 11434,
+    url: 'http://localhost:11434',
+    description: 'Local LLM runtime — run Llama 3, Mistral, CodeLlama and more offline.',
+    icon: '🦙',
+  },
+  {
+    category: 'AI & LLMs',
+    name: 'AnythingLLM',
+    port: 3003,
+    url: 'http://localhost:3003',
+    description: 'RAG-powered chat over your own documents and codebase.',
+    icon: '📂',
+  },
+  {
+    category: 'AI & LLMs',
+    name: 'Flowise',
+    port: 3004,
+    url: 'http://localhost:3004',
+    description: 'Visual drag-and-drop LLM workflow and agent builder.',
+    icon: '🔗',
+  },
+  {
+    category: 'AI & LLMs',
+    name: 'LiteLLM Proxy',
+    port: 4000,
+    url: 'http://localhost:4000',
+    description: 'Unified API gateway for OpenAI, Anthropic, Bedrock, Ollama and more.',
+    icon: '🔀',
+  },
+
   // ── Portal ───────────────────────────────────────────────────────────────────
   {
     category: 'Portal',
