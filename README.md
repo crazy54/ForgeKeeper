@@ -34,6 +34,15 @@
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Ollama-local%20LLMs-000000?style=flat-square&logo=ollama&logoColor=white" alt="Ollama" />
+  <img src="https://img.shields.io/badge/Open%20WebUI-port%208085-5C5CFF?style=flat-square&logo=openai&logoColor=white" alt="Open WebUI" />
+  <img src="https://img.shields.io/badge/LiteLLM-proxy%20gateway-FF6B35?style=flat-square&logo=lightning&logoColor=white" alt="LiteLLM" />
+  <img src="https://img.shields.io/badge/Flowise-LLM%20workflows-00C4CC?style=flat-square&logo=node.js&logoColor=white" alt="Flowise" />
+  <img src="https://img.shields.io/badge/Aider-AI%20pair%20programmer-6E40C9?style=flat-square&logo=github&logoColor=white" alt="Aider" />
+  <img src="https://img.shields.io/badge/AnythingLLM-RAG%20chat-F59E0B?style=flat-square&logo=files&logoColor=white" alt="AnythingLLM" />
+</p>
+
 ---
 
 ## Table of Contents
