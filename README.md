@@ -1,150 +1,467 @@
 # ForgeKeeper
 
 <p align="center">
-  <img src="logo/Forge.png" alt="ForgeKeeper logo" width="320" />
+  <img src="logo/Forge.png" alt="ForgeKeeper logo" width="520" />
 </p>
 
-ForgeKeeper is meant to be the most capable developer container available. This spec captures what needs to be installed in the image and the workflows the container should enable once a developer attaches to it. The ForgeKeeper identity above should appear anywhere this project surfaces—from README to terminal banners and hosted IDE welcome screens.
+<p align="center">
+  <strong>The most capable polyglot developer container — batteries included, zero compromise.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/base-Ubuntu%2024.04-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Ubuntu 24.04" />
+  <img src="https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/devcontainer-compatible-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="Dev Container" />
+  <img src="https://img.shields.io/badge/portal-port%207000-FF6B35?style=for-the-badge&logo=firefoxbrowser&logoColor=white" alt="Portal Port 7000" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-20%20LTS%20%7C%2022-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Go-1.22-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go" />
+  <img src="https://img.shields.io/badge/Rust-stable%20%2B%20nightly-CE422B?style=flat-square&logo=rust&logoColor=white" alt="Rust" />
+  <img src="https://img.shields.io/badge/JDK-17%20%7C%2021-ED8B00?style=flat-square&logo=openjdk&logoColor=white" alt="JDK" />
+  <img src="https://img.shields.io/badge/.NET-7%20%7C%208-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt=".NET" />
+  <img src="https://img.shields.io/badge/Kotlin-1.9-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin" />
+  <img src="https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Terraform-1.7-7B42BC?style=flat-square&logo=terraform&logoColor=white" alt="Terraform" />
+  <img src="https://img.shields.io/badge/kubectl-latest-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="kubectl" />
+  <img src="https://img.shields.io/badge/Helm-3.15-0F1689?style=flat-square&logo=helm&logoColor=white" alt="Helm" />
+  <img src="https://img.shields.io/badge/AWS%20CLI-v2-FF9900?style=flat-square&logo=amazonaws&logoColor=white" alt="AWS CLI" />
+  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
+</p>
+
+---
+
+## Table of Contents
+
+- [Vision & Pillars](#vision--pillars)
+- [Quick Start](#quick-start)
+- [Hosted Services](#hosted-services)
+- [Base Image & Layering](#base-image--layering)
+- [Core System Packages](#core-system-packages)
+- [Runtimes & Languages](#runtimes--languages)
+- [Container, Cloud & Infra Tooling](#container-cloud--infra-tooling)
+- [Observability & QA](#observability--qa)
+- [Local Services](#local-services)
+- [Developer Ergonomics](#developer-ergonomics)
+- [Inside-Container Workflows](#inside-container-workflows)
+- [Security & Compliance](#security--compliance)
+- [Performance & Caching](#performance--caching)
+- [Local Orchestration](#local-orchestration)
+- [Next Steps](#next-steps)
+
+---
 
 ## Vision & Pillars
-- **Polyglot first**: Ready for web, backend, infrastructure, and ML projects without extra installs.
-- **Fast feedback**: Opinionated tooling, formatters, and task runners that make tests, lint, and builds one command away.
-- **Hermetic yet extensible**: Deterministic installs via pinned versions, but easy overrides through a runtime manager (mise/asdf).
-- **Secure by default**: Secrets handling, scanning, and least-privileged defaults baked in.
-- **Delightful ergonomics**: Pre-tuned shell, editors, prompt, and helpers for day-to-day work.
+
+| Pillar | Description |
+|---|---|
+| 🌐 **Polyglot first** | Ready for web, backend, infrastructure, and ML — no extra installs needed |
+| ⚡ **Fast feedback** | Opinionated tooling, formatters, and task runners make tests, lint, and builds one command away |
+| 🔒 **Hermetic yet extensible** | Deterministic installs via pinned versions, easy overrides through `mise`/`asdf` |
+| 🛡️ **Secure by default** | Secrets handling, scanning, and least-privileged defaults baked in |
+| 🎨 **Delightful ergonomics** | Pre-tuned shell, editors, prompt, and helpers for day-to-day work |
+
+---
+
+## Quick Start
+
+```bash
+# Clone and boot the full stack
+git clone <your-repo-url> forgekeeper
+cd forgekeeper
+
+# Personalize (optional)
+export FORGEKEEPER_USER_EMAIL="you@example.com"
+export FORGEKEEPER_HANDLE="yourhandle"
+export FORGEKEEPER_WORKSPACE="myproject"
+
+# Build and run
+docker compose up --build forgekeeper
+```
+
+Then open [http://localhost:7000](http://localhost:7000) — the ForgeKeeper Portal.
+
+> **VS Code users:** Open the folder in VS Code and select **Reopen in Container** when prompted.
+
+---
+
+## Hosted Services
+
+Once the container is running, the following services are available:
+
+### IDEs & Editors
+
+| Service | Port | Description |
+|---|---|---|
+| 🛠️ **VS Code Server** | `8080` | Full VS Code in any browser |
+| 🧭 **OpenVSCode Server** | `3000` | Lightweight VS Code from Microsoft sources |
+
+### Terminals
+
+| Service | Port | Description |
+|---|---|---|
+| 💻 **ttyd Terminal** | `7681` | Browser-based zsh/tmux with personalized MOTD |
+| 🖥️ **Wetty Terminal** | `3002` | SSH-over-HTTP terminal — full shell in a browser tab |
+
+### Data & ML
+
+| Service | Port | Description |
+|---|---|---|
+| 📓 **JupyterLab** | `8888` | Data notebooks with ForgeKeeper kernels |
+| 📈 **MLflow UI** | `5000` | Track experiments, parameters, and metrics |
+| 🧠 **TensorBoard** | `6006` | Visualize training runs and scalars |
+
+### Database UIs
+
+| Service | Port | Description |
+|---|---|---|
+| 🐘 **pgAdmin** | `5050` | Full-featured PostgreSQL administration and query tool |
+| 🗄️ **Adminer** | `8082` | Lightweight DB admin for PostgreSQL, MySQL, SQLite, and more |
+| 🔴 **RedisInsight** | `8001` | Visual browser and profiler for Redis data structures |
+| 🍃 **Mongo Express** | `8081` | Web-based MongoDB admin interface |
+
+### Observability
+
+| Service | Port | Description |
+|---|---|---|
+| 📊 **Grafana** | `3001` | Dashboards for metrics, logs, and traces from any source |
+| 🔥 **Prometheus** | `9090` | Metrics scraping and alerting — query with PromQL |
+| 🔭 **Jaeger UI** | `16686` | Distributed tracing — visualize request flows across services |
+| ⚡ **Netdata** | `19999` | Real-time system performance: CPU, memory, disk, network |
+
+### Container & Infra
+
+| Service | Port | Description |
+|---|---|---|
+| 🐳 **Portainer** | `9000` | Docker container management — start, stop, inspect, and log |
+
+### API & Docs
+
+| Service | Port | Description |
+|---|---|---|
+| 📋 **Swagger UI** | `8083` | Interactive OpenAPI documentation and live API testing |
+| 📚 **MkDocs** | `8084` | Live preview of your project documentation site |
+
+### Portal
+
+| Service | Port | Description |
+|---|---|---|
+| 🔥 **ForgeKeeper Portal** | `7000` | Dashboard for all hosted tooling + container controls |
+
+### Portal Controls
+
+The portal at `/forgekeeper/control` (served by `portal/server.py`) exposes two actions:
+
+- **Shutdown** — sends `SIGTERM` to PID 1, stopping the container gracefully
+- **Reset** — wipes `/workspaces/*` and restarts supervised services
+
+Extend `scripts/forgekeeper-control.sh` for enterprise-grade automation.
+
+---
 
 ## Base Image & Layering
-1. **Base**: `mcr.microsoft.com/devcontainers/base:ubuntu-24.04` (glibc, systemd, GPU-capable).
-2. **Locale/timezone**: UTF-8 locales, `tzdata`, consistent timezone (UTC) with ability to override via env.
-3. **Non-root user**: `dev` user with passwordless sudo, docker group membership, zsh as default shell.
-4. **Dotfiles bootstrap**: Optional Git-based dotfiles sync (run on first attach) with caching to `/workspaces/.cache/dotfiles`.
+
+```
+mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+  └── Locale/timezone (UTF-8, UTC)
+      └── Non-root user: `vscode` (passwordless sudo, docker group, zsh)
+          └── Dotfiles bootstrap (Git-based, cached to /workspaces/.cache/dotfiles)
+```
+
+---
 
 ## Core System Packages
-- Build essentials: `build-essential`, `cmake`, `ninja-build`, `pkg-config`, `gdb`, `lldb`, `valgrind`.
-- Shell/UI: `zsh`, `fish`, `tmux`, `zellij`, `starship`, `fzf`, `ripgrep`, `fd`, `bat`, `delta`, `direnv`, `just`, `gh`, `gpg`.
-- Networking & diagnostics: `netcat-openbsd`, `iperf3`, `httpie`, `curl`, `wget`, `jq`, `yq`, `dnsutils`, `traceroute`.
-- Troubleshooting/monitoring: `htop`, `btop`, `glances`, `iotop`, `iftop`, `nvtop`, `strace`, `lsof`, `sysstat`, `procs`.
-- Fonts/themes: Nerd Fonts (JetBrains Mono, Fira Code) copied to `/usr/local/share/fonts` for GUI editor attachments.
 
-## Runtime & Package Management Strategy
-- **mise** (preferred) or **asdf** for installing language/tool versions per-project via `.tool-versions` / `mise.toml`.
-- Global caches persisted to `/workspaces/.cache` to survive rebuilds.
+<details>
+<summary>Build & Compiler Toolchain</summary>
+
+`build-essential` · `cmake` · `ninja-build` · `pkg-config` · `gdb` · `lldb` · `valgrind` · `clang` · `clangd`
+
+</details>
+
+<details>
+<summary>Shell & Terminal Utilities</summary>
+
+`zsh` · `fish` · `tmux` · `zellij` · `starship` · `fzf` · `ripgrep` · `fd` · `bat` · `delta` · `direnv` · `just` · `gh` · `gpg` · `neovim` · `helix`
+
+</details>
+
+<details>
+<summary>Networking & Diagnostics</summary>
+
+`netcat-openbsd` · `iperf3` · `httpie` · `curl` · `wget` · `jq` · `yq` · `dnsutils` · `traceroute`
+
+</details>
+
+<details>
+<summary>Monitoring & Troubleshooting</summary>
+
+`htop` · `btop` · `glances` · `iotop` · `iftop` · `nvtop` · `strace` · `lsof` · `sysstat` · `procs`
+
+</details>
+
+<details>
+<summary>Fonts</summary>
+
+JetBrains Mono Nerd Font · Fira Code — copied to `/usr/local/share/fonts` for GUI editor attachments.
+
+</details>
+
+---
+
+## Runtimes & Languages
 
 ### JavaScript / TypeScript / Front-end
-- Node.js 20 LTS + 22 current, installed via mise; `corepack enable` for Yarn/PNPM.
-- Extras: `bun`, `deno`, `eslint`, `prettier`, `tsc`, `vitest`, `playwright` browsers, `turborepo` CLI.
+
+![Node.js](https://img.shields.io/badge/Node.js-20%20LTS%20%7C%2022-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-latest-000000?style=flat-square&logo=bun&logoColor=white)
+![Deno](https://img.shields.io/badge/Deno-latest-000000?style=flat-square&logo=deno&logoColor=white)
+
+Installed via `mise`. `corepack enable` activates Yarn/PNPM. Extras: `bun`, `deno`, `eslint`, `prettier`, `tsc`, `vitest`, `playwright`, `turborepo`.
 
 ### Python & Data
-- CPython 3.12 + 3.11 (mise), `uv` for dependency resolution, `pipx`, `poetry`, `rye`, `tox`, `pytest`, `ruff`, `black`, `mypy`.
-- Data tooling: `jupyterlab`, `ipykernel`, `pandas`, `numpy`, `scipy`, `polars`, `matplotlib`, `scikit-learn`.
-- ML accelerators optional: CUDA toolkits toggled via build arg.
+
+![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![Jupyter](https://img.shields.io/badge/JupyterLab-latest-F37626?style=flat-square&logo=jupyter&logoColor=white)
+
+CPython 3.12 + 3.11 via `mise`. `uv` for dependency resolution. Includes `pipx`, `poetry`, `rye`, `tox`, `pytest`, `ruff`, `black`, `mypy`.
+
+Data tooling: `jupyterlab`, `pandas`, `numpy`, `scipy`, `polars`, `matplotlib`, `scikit-learn`. CUDA toolkits optional via build arg.
 
 ### Go
-- Go 1.22, `delve`, `gofumpt`, `golangci-lint`, `air` (live reload), `mockgen`.
+
+![Go](https://img.shields.io/badge/Go-1.22-00ADD8?style=flat-square&logo=go&logoColor=white)
+
+Go 1.22 with `delve`, `gofumpt`, `golangci-lint`, `air` (live reload), `mockgen`.
 
 ### Rust
-- `rustup` with stable + nightly toolchains, `clippy`, `rustfmt`, `cargo-nextest`, `cargo-watch`, `wasm32` target.
+
+![Rust](https://img.shields.io/badge/Rust-stable%20%2B%20nightly-CE422B?style=flat-square&logo=rust&logoColor=white)
+
+`rustup` with stable + nightly toolchains, `clippy`, `rustfmt`, `cargo-nextest`, `cargo-watch`, `wasm32` target.
 
 ### JVM & Polyglot
-- Temurin JDK 21 + 17, `maven`, `gradle`, `jabba` support, `coursier`, Kotlin compiler, Scala (via sbt) for polyglot builds.
 
-### .NET & C#
-- .NET SDK 8.0 + 7.0, `omnisharp`, `dotnet-ef`, `dotnet-script`.
+![Java](https://img.shields.io/badge/JDK-17%20%7C%2021-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-1.9-7F52FF?style=flat-square&logo=kotlin&logoColor=white)
+
+Temurin JDK 21 + 17, `maven`, `gradle`, `coursier`, Kotlin compiler, Scala (via sbt).
+
+### .NET & C\#
+
+![.NET](https://img.shields.io/badge/.NET-7%20%7C%208-512BD4?style=flat-square&logo=dotnet&logoColor=white)
+
+.NET SDK 8.0 + 7.0, `omnisharp`, `dotnet-ef`, `dotnet-script`.
 
 ### Other Languages
-- Ruby 3.3 (rbenv via mise), `bundler`, `jekyll`.
-- PHP 8.3 + Composer.
-- Elixir/Erlang (via mise), `hex`, `rebar3`.
 
-## Container, Cloud, and Infra Tooling
-- Docker CLI + Docker Compose v2, `nerdctl`, `buildx`, `img`, `dive` for image inspection.
-- Kubernetes: `kubectl`, `helm`, `kustomize`, `kind`, `minikube`, `skaffold`, `k9s`.
-- HashiStack: `terraform`, `packer`, `vault`, `consul`, `nomad`, `boundary` CLIs.
-- Cloud SDKs: `awscli`, `aws-vault`, `sam`, `gcloud`, `kubelogin`, `az`, `doctl`, `flyctl`, `heroku`, `supabase`, `vercel`, `netlify`.
-- IaC/QoL: `ansible`, `pulumi`, `cue`, `opa`, `conftest`.
+| Language | Version | Notes |
+|---|---|---|
+| Ruby | 3.3 | rbenv via mise, `bundler`, `jekyll` |
+| PHP | 8.3 | Composer included |
+| Elixir/Erlang | latest | via mise, `hex`, `rebar3` |
+| Swift | 5.10 | Full toolchain |
+| Dart | stable | SDK included |
 
-## Observability & QA Tooling
-- Testing: `act` (GitHub Actions local), `tilt`, `k6`, `locust`, `newman`, `mockoon-cli`.
-- Debug proxies: `mitmproxy`, `ngrok`, `cloudflared tunnel`, `httptoolkit-server`.
-- Tracing/logging: `otel-cli`, `tempo-cli`, `loki-canary`, `stern`, `kubetail`.
-- Static analysis/security: `semgrep`, `trivy`, `grype`, `syft`, `gitleaks`, `bandit`, `cargo-audit`, `npm audit` wrappers, `dependabot` config generator.
+---
 
-## Local Services to Run Inside the Container
-Provisioned through docker-compose within the devcontainer so they can be toggled per project:
-- Datastores: PostgreSQL 16, MySQL 8, Redis 7, KeyDB, MongoDB 7, Elasticsearch/OpenSearch, Meilisearch, MinIO, RabbitMQ, Kafka/Redpanda, LocalStack, Azurite, MailHog, Temporal, NATS.
-- Feature flag/testing: Flipt, Testcontainers CLI for ephemeral dependency bootstrapping.
-- Reverse proxies: Caddy, Traefik for TLS termination during dev.
+## Container, Cloud & Infra Tooling
+
+### Containers & Orchestration
+
+![Docker](https://img.shields.io/badge/Docker-CLI%20%2B%20Compose%20v2-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-kubectl%20%7C%20helm%20%7C%20k9s-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
+
+`docker`, `docker compose`, `nerdctl`, `buildx`, `dive` · `kubectl`, `helm`, `kustomize`, `kind`, `minikube`, `skaffold`, `k9s`
+
+### HashiCorp Stack
+
+![Terraform](https://img.shields.io/badge/Terraform-1.7-7B42BC?style=flat-square&logo=terraform&logoColor=white)
+
+`terraform`, `packer`, `vault`, `consul`, `nomad`, `boundary`
+
+### Cloud SDKs
+
+![AWS](https://img.shields.io/badge/AWS%20CLI-v2-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+![GCP](https://img.shields.io/badge/gcloud-latest-4285F4?style=flat-square&logo=googlecloud&logoColor=white)
+![Azure](https://img.shields.io/badge/az-latest-0078D4?style=flat-square&logo=microsoftazure&logoColor=white)
+
+`awscli`, `aws-vault`, `sam` · `gcloud` · `az` · `doctl`, `flyctl`, `heroku`, `supabase`, `vercel`, `netlify`
+
+### IaC & Policy
+
+`ansible`, `pulumi`, `cue`, `opa`, `conftest`
+
+---
+
+## Observability & QA
+
+| Category | Tools |
+|---|---|
+| Testing | `act`, `tilt`, `k6`, `locust`, `newman`, `mockoon-cli` |
+| Debug Proxies | `mitmproxy`, `ngrok`, `cloudflared`, `httptoolkit-server` |
+| Tracing/Logging | `otel-cli`, `stern`, `kubetail` |
+| Security Scanning | `semgrep`, `trivy`, `grype`, `syft`, `gitleaks`, `bandit`, `cargo-audit` |
+
+---
+
+## Local Services
+
+Provisioned via `docker-compose` inside the devcontainer — toggle per project:
+
+<details>
+<summary>Datastores</summary>
+
+PostgreSQL 16 · MySQL 8 · Redis 7 · KeyDB · MongoDB 7 · Elasticsearch/OpenSearch · Meilisearch · MinIO · RabbitMQ · Kafka/Redpanda · LocalStack · Azurite · MailHog · Temporal · NATS
+
+</details>
+
+<details>
+<summary>Feature Flags & Testing</summary>
+
+Flipt · Testcontainers CLI
+
+</details>
+
+<details>
+<summary>Reverse Proxies</summary>
+
+Caddy · Traefik (TLS termination during dev)
+
+</details>
+
+<details>
+<summary>Ops Dashboards</summary>
+
+Portainer · Lazydocker · pgAdmin · Adminer · RedisInsight · Meilisearch console
+
+</details>
+
+---
 
 ## Developer Ergonomics
-<img src="logo/Forge.png" alt="ForgeKeeper mark" width="140" align="right" />
-- Shell customizations: zsh default with Oh My Zsh, starship prompt, autosuggestions, syntax highlighting, `direnv` hooks, alias pack for kubectl/terraform.
-- Editor helpers: preinstalled VS Code extensions (Dev Containers, ESLint, Prettier, Python, Rust Analyzer, Go, Docker, YAML, Terraform, GitHub Copilot), Neovim nightly with LazyVim distribution, Helix for lightweight editing.
-- Tiling multiplexer: tmux with `tmuxinator forgekeeper.yml`, Zellij layout preconfigured with panes (editor/tests/logs).
-- Git experience: `lazygit`, `forgit`, commit template, conventional commits CLI, `pre-commit` with shared hook set.
 
-## Web IDE & Hosted Tooling
-<p align="right"><img src="logo/Forge.png" alt="ForgeKeeper glyph" width="140" /></p>
-- ForgeKeeper Portal (port `7000`): animated splash (logo fade-in + "Welcome to the Forge" typing effect) that routes to a dashboard listing every hosted UI plus quick actions to power down/reset the container via `/forgekeeper/control`. Bookmarkable homepage with status cards and the logo everywhere.
-- **Portal Controls**: `/forgekeeper/control` is served from the portal itself via `portal/server.py`. It shells out to `/usr/local/bin/forgekeeper-control.sh` where `shutdown` terminates PID 1 (stopping the container) and `reset` wipes `/workspaces/*` before restarting supervised services. Extend the script for enterprise-grade workflows if you need custom automation.
-- VS Code Server: bundle `code-server`/`openvscode-server` configured to start under supervisor, published on `8080` with optional TLS/oidc. On first launch a bootstrap script prompts for email/username/workspace and renders a ForgeKeeper ASCII banner plus `cowsay` greeting in every shell session.
-- Every hosted surface (code-server welcome, JupyterLab, ttyd landing page) should load the ForgeKeeper logo from `logo/Forge.png` so the brand is front and center even before attaching a shell.
-- Browser-based terminals: `ttyd` + `wetty` so users with only a browser can drop into zsh/tmux. Session banners reuse the collected identity metadata.
-- Data/ML surfaces: expose `JupyterLab`, `TensorBoard`, `mlflow ui` via dedicated ports, proxied through Traefik for auth and HTTPS.
-- Ops dashboards: ship `Portainer` (Docker), `Lazydocker`, `pgAdmin`, `Adminer`, `RedisInsight`, and `Meilisearch` console to manage local services without extra installs.
-- Documentation/knowledge: host `mkdocs serve` or `Docsify` container for project docs previews, plus `miniserve` for quick artifact downloads.
+### Shell & Prompt
+
+- **zsh** default with Oh My Zsh, starship prompt, autosuggestions, syntax highlighting
+- `direnv` hooks, alias pack for `kubectl`/`terraform`
+- `tmux` with `tmuxinator forgekeeper.yml`, Zellij layout (editor/tests/logs panes)
+
+### Editors
+
+- VS Code extensions pre-installed: ESLint, Prettier, Python, Rust Analyzer, Go, Docker, YAML, Terraform, GitHub Copilot
+- Neovim nightly with LazyVim distribution
+- Helix for lightweight editing
+
+### Git Experience
+
+`lazygit` · `forgit` · commit template · conventional commits CLI · `pre-commit` with shared hook set
+
+---
 
 ## Inside-Container Workflows
-### Automation Scripts
-Use a `justfile` (or `taskfile`) with canonical recipes:
-- `just bootstrap`: Sync dotfiles, install mise tools, fetch git hooks, install VS Code extensions.
-- `just update`: Refresh base packages, run security scanners, update lockfiles, regenerate SBOM via `syft`.
-- `just qa`: Run formatters, linters, unit tests, coverage, type checks for every supported language.
-- `just db.up` / `just db.down`: Stand up or tear down docker-compose defined services.
-- `just ship`: Build container image, run integration tests, produce release artifacts.
+
+### Automation Scripts (`justfile`)
+
+```bash
+just bootstrap   # Sync dotfiles, install mise tools, fetch git hooks, install VS Code extensions
+just update      # Refresh packages, run security scanners, update lockfiles, regenerate SBOM
+just qa          # Formatters, linters, unit tests, coverage, type checks for every language
+just db.up       # Stand up docker-compose defined services
+just db.down     # Tear down docker-compose defined services
+just ship        # Build image, run integration tests, produce release artifacts
+just status      # Print versions, running services, disk usage, network forwarding info
+```
+
+### Lifecycle Hooks (`devcontainer.json`)
+
+| Hook | Action |
+|---|---|
+| `onCreateCommand` | `just bootstrap` + `pre-commit install` + `mise install` + `direnv allow` |
+| `postCreateCommand` | Seed databases, run migrations, start background watchers |
+| `postStartCommand` | Launch `tmuxinator forgekeeper`, attach to tmux, present status dashboard |
+| `postAttachCommand` | Run `mise doctor`, print versions, tail logs |
+
+### Daily Developer Flow
+
+```
+1. Attach      → drop into tmux (editor + just monitor + k9s panes)
+2. Sync        → mise install  (matches .tool-versions)
+3. Start deps  → just db.up
+4. Watch       → npm run dev / air / cargo watch -x check
+5. QA loop     → just qa
+6. Preflight   → just ship  (SBOM + trivy scan + changelog)
+```
 
 ### Branding & Session Personalization
-![ForgeKeeper terminal banner](logo/Forge.png)
-- Build script prompts for `FORGEKEEPER_USER_EMAIL`, `FORGEKEEPER_HANDLE`, and `FORGEKEEPER_WORKSPACE` (interactive when run locally, env-driven in CI). Values flow into Docker labels, `devcontainer.json` env, and `/etc/forgekeeper/motd.d/banner`.
-- First shell attach runs `gum format` + `figlet` + `lolcat` to render the ForgeKeeper badge, followed by `cowsay` summarizing who/what the session is for. Banner is rehydrated inside tmux panes and web terminals.
-- Metadata is logged (with opt-out) to `/var/log/forgekeeper/sessions.log` for auditing build usage and powering weekly summary emails.
 
-### Lifecycle Hooks (devcontainer.json)
-- `onCreateCommand`: `just bootstrap` + `pre-commit install` + `mise install` + `direnv allow`.
-- `postCreateCommand`: Seed local databases with fixtures, run migrations, start background watchers (`air`, `cargo watch`, `npm run dev`).
-- `postStartCommand`: Launch `tmuxinator forgekeeper`, attach to tmux automatically, present status dashboard.
-- `postAttachCommand`: Run `mise doctor`, print versions, tail logs for running services.
+Set these env vars before building to personalize banners, MOTD, and Docker labels:
 
-### Daily Flow for Developers
-1. **Attach** ➜ automatically drop into tmux session with panes for editor, `just monitor`, and `k9s` (if Kubernetes services are active).
-2. **Sync runtimes** ➜ `mise install` ensures Node/Python/Go/etc match `.tool-versions`.
-3. **Start dependencies** ➜ `just db.up` or `docker compose up` for stack-specific needs.
-4. **Run watchers** ➜ `npm run dev`, `air`, `cargo watch -x check`, etc., configured via Procfile.dev.
-5. **QA loop** ➜ `just qa` or language-specific (e.g., `uv run pytest`, `pnpm test`, `go test ./...`).
-6. **Preflight before push** ➜ `just ship` ensures SBOM, vulnerability scan (`trivy fs .`), git hooks, changelog generation.
+```bash
+FORGEKEEPER_USER_EMAIL="you@example.com"
+FORGEKEEPER_HANDLE="yourhandle"
+FORGEKEEPER_WORKSPACE="myproject"
+```
+
+On first attach: `gum format` + `figlet` + `lolcat` render the ForgeKeeper badge, followed by a `cowsay` session summary.
+
+---
 
 ## Security & Compliance
-<img src="logo/Forge.png" alt="ForgeKeeper badge" width="120" align="right" />
-- Secrets: Support for `1password-cli`, `aws-vault`, `doppler`, `sops`, `age`; mount `/workspaces/.secrets` with git-ignored templates.
-- Mandatory `pre-commit` hooks: `detect-secrets`, `checkov`, `eslint --max-warnings=0`, `ruff`, `go fmt`, `terraform fmt`, `hadolint`.
-- Image scanning: nightly `trivy image forgekeeper` plus SBOM generation via `syft` committed to `sbom/`.
-- Supply chain: `cosign` for signing, `slsa-verifier` for verifying upstream binaries.
+
+| Area | Tools |
+|---|---|
+| Secrets management | `1password-cli`, `aws-vault`, `doppler`, `sops`, `age` |
+| Pre-commit hooks | `detect-secrets`, `checkov`, `eslint --max-warnings=0`, `ruff`, `go fmt`, `terraform fmt`, `hadolint` |
+| Image scanning | Nightly `trivy image forgekeeper` + SBOM via `syft` committed to `sbom/` |
+| Supply chain | `cosign` for signing, `slsa-verifier` for verifying upstream binaries |
+
+> Secrets mount point: `/workspaces/.secrets` (git-ignored templates provided).
+
+---
 
 ## Performance & Caching
-- Enable docker build cache mounts for package managers (npm cache, pip cache, go build cache, cargo registry).
-- Use `vscode-remote.tryWorkspaceMount` to mount host `~/.ssh` read-only, host docker socket optional.
-- Optional remote cache providers: `bazelisk` with RBE stub, `buildkitd` with `BUILDKIT_PROGRESS=plain` for CI parity.
 
-## Telemetry & Reporting
-- `just status` command outputs versions, running services, disk usage, network forwarding info.
-- Healthcheck script ensures runtime managers, watchers, and services are up; surfaces results in VS Code "Ports" / "Dev Containers" panels.
+- Docker build cache mounts for `npm`, `pip`, `go`, `cargo` package managers
+- Host `~/.ssh` mounted read-only via `vscode-remote.tryWorkspaceMount`
+- Optional remote cache: `bazelisk` with RBE stub, `buildkitd` with `BUILDKIT_PROGRESS=plain`
+- Global caches persisted to `/workspaces/.cache` — survive container rebuilds
 
-## Local Orchestration & Testing
-- `docker-compose.yml` ships with all required port bindings and build args; run `docker compose up --build forgekeeper` to boot the full stack locally.
-- `devcontainer.json` allows attaching with VS Code Remote Containers; set `FORGEKEEPER_*` env vars locally before rebuild to personalize banners.
-- Supervisor launches code-server, openvscode, Jupyter, ttyd, MLflow, and the ForgeKeeper Portal automatically from the entrypoint. Logs land in `/var/log/forgekeeper/`.
-- Portal power/reset buttons call the control endpoint; use them to validate shutdown/reset flows before wiring CI/CD automation.
+---
+
+## Local Orchestration
+
+```bash
+# Boot the full stack locally
+docker compose up --build forgekeeper
+
+# Attach with VS Code Remote Containers
+# Set FORGEKEEPER_* env vars before rebuild to personalize banners
+
+# Supervisor manages: code-server, openvscode, Jupyter, ttyd, MLflow, Portal
+# Logs: /var/log/forgekeeper/
+```
+
+Healthcheck script ensures runtime managers, watchers, and services are up — surfaces results in VS Code "Ports" / "Dev Containers" panels.
+
+---
 
 ## Next Steps
-- Connect `/forgekeeper/control` to your orchestration (or extend `forgekeeper-control.sh`) for production-grade shutdown/reset approvals.
-- Set up nightly `docker build && docker push` (e.g., GitHub Actions) and add the resulting status badge to the README header.
-- Document onboarding plus architecture diagrams for the hosted service mesh.
+
+- Wire `/forgekeeper/control` to your orchestration (or extend `forgekeeper-control.sh`) for production-grade shutdown/reset approvals
+- Set up nightly `docker build && docker push` via GitHub Actions and add the resulting status badge to this README
+- Document onboarding and architecture diagrams for the hosted service mesh
+- Connect `FORGEKEEPER_*` env vars to your secrets manager for team-wide personalization
+
+---
+
+<p align="center">
+  <img src="logo/Forge.png" alt="ForgeKeeper" width="80" />
+  <br/>
+  <sub>Built with 🔥 by the ForgeKeeper project</sub>
+</p>

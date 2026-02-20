@@ -1,5 +1,7 @@
 const services = [
+  // ── IDEs & Editors ──────────────────────────────────────────────────────────
   {
+    category: 'IDEs & Editors',
     name: 'VS Code Server',
     port: 8080,
     url: 'http://localhost:8080',
@@ -7,27 +9,17 @@ const services = [
     icon: '🛠️',
   },
   {
+    category: 'IDEs & Editors',
     name: 'OpenVSCode Server',
     port: 3000,
     url: 'http://localhost:3000',
     description: 'Lightweight VS Code build direct from Microsoft sources.',
     icon: '🧭',
   },
+
+  // ── Terminals ───────────────────────────────────────────────────────────────
   {
-    name: 'ForgeKeeper Portal',
-    port: 7000,
-    url: 'http://localhost:7000',
-    description: 'You are here—bookmark for all hosted tooling.',
-    icon: '🔥',
-  },
-  {
-    name: 'JupyterLab',
-    port: 8888,
-    url: 'http://localhost:8888',
-    description: 'Data notebooks with ForgeKeeper kernels baked in.',
-    icon: '📓',
-  },
-  {
+    category: 'Terminals',
     name: 'ttyd Terminal',
     port: 7681,
     url: 'http://localhost:7681',
@@ -35,6 +27,25 @@ const services = [
     icon: '💻',
   },
   {
+    category: 'Terminals',
+    name: 'Wetty Terminal',
+    port: 3002,
+    url: 'http://localhost:3002',
+    description: 'SSH-over-HTTP terminal — full shell in a browser tab.',
+    icon: '🖥️',
+  },
+
+  // ── Data & ML ────────────────────────────────────────────────────────────────
+  {
+    category: 'Data & ML',
+    name: 'JupyterLab',
+    port: 8888,
+    url: 'http://localhost:8888',
+    description: 'Data notebooks with ForgeKeeper kernels baked in.',
+    icon: '📓',
+  },
+  {
+    category: 'Data & ML',
     name: 'MLflow UI',
     port: 5000,
     url: 'http://localhost:5000',
@@ -42,11 +53,118 @@ const services = [
     icon: '📈',
   },
   {
+    category: 'Data & ML',
     name: 'TensorBoard',
     port: 6006,
     url: 'http://localhost:6006',
     description: 'Visualize training runs and scalars.',
     icon: '🧠',
+  },
+
+  // ── Database UIs ─────────────────────────────────────────────────────────────
+  {
+    category: 'Database UIs',
+    name: 'pgAdmin',
+    port: 5050,
+    url: 'http://localhost:5050',
+    description: 'Full-featured PostgreSQL administration and query tool.',
+    icon: '🐘',
+  },
+  {
+    category: 'Database UIs',
+    name: 'Adminer',
+    port: 8082,
+    url: 'http://localhost:8082',
+    description: 'Lightweight DB admin for PostgreSQL, MySQL, SQLite, and more.',
+    icon: '🗄️',
+  },
+  {
+    category: 'Database UIs',
+    name: 'RedisInsight',
+    port: 8001,
+    url: 'http://localhost:8001',
+    description: 'Visual browser and profiler for Redis data structures.',
+    icon: '🔴',
+  },
+  {
+    category: 'Database UIs',
+    name: 'Mongo Express',
+    port: 8081,
+    url: 'http://localhost:8081',
+    description: 'Web-based MongoDB admin interface.',
+    icon: '🍃',
+  },
+
+  // ── Observability ────────────────────────────────────────────────────────────
+  {
+    category: 'Observability',
+    name: 'Grafana',
+    port: 3001,
+    url: 'http://localhost:3001',
+    description: 'Dashboards for metrics, logs, and traces from any source.',
+    icon: '📊',
+  },
+  {
+    category: 'Observability',
+    name: 'Prometheus',
+    port: 9090,
+    url: 'http://localhost:9090',
+    description: 'Metrics scraping and alerting — query with PromQL.',
+    icon: '🔥',
+  },
+  {
+    category: 'Observability',
+    name: 'Jaeger UI',
+    port: 16686,
+    url: 'http://localhost:16686',
+    description: 'Distributed tracing — visualize request flows across services.',
+    icon: '🔭',
+  },
+  {
+    category: 'Observability',
+    name: 'Netdata',
+    port: 19999,
+    url: 'http://localhost:19999',
+    description: 'Real-time system performance: CPU, memory, disk, network.',
+    icon: '⚡',
+  },
+
+  // ── Container & Infra ────────────────────────────────────────────────────────
+  {
+    category: 'Container & Infra',
+    name: 'Portainer',
+    port: 9000,
+    url: 'http://localhost:9000',
+    description: 'Docker container management — start, stop, inspect, and log.',
+    icon: '🐳',
+  },
+
+  // ── API & Docs ───────────────────────────────────────────────────────────────
+  {
+    category: 'API & Docs',
+    name: 'Swagger UI',
+    port: 8083,
+    url: 'http://localhost:8083',
+    description: 'Interactive OpenAPI documentation and live API testing.',
+    icon: '📋',
+  },
+  {
+    category: 'API & Docs',
+    name: 'MkDocs',
+    port: 8084,
+    url: 'http://localhost:8084',
+    description: 'Live preview of your project documentation site.',
+    icon: '📚',
+  },
+
+  // ── Portal ───────────────────────────────────────────────────────────────────
+  {
+    category: 'Portal',
+    name: 'ForgeKeeper Portal',
+    port: 7000,
+    url: 'http://localhost:7000',
+    description: 'You are here — bookmark for all hosted tooling.',
+    icon: '🔥',
   },
 ];
 
@@ -75,22 +193,45 @@ yearEl.textContent = new Date().getFullYear();
 
 function renderServices() {
   serviceGrid.innerHTML = '';
-  for (const svc of services) {
-    const card = document.createElement('article');
-    card.className = 'service-card';
-    card.innerHTML = `
-      <div class="service-logo-tag">
-        <img src="logo/Forge.png" alt="ForgeKeeper emblem" />
-      </div>
-      <div class="service-icon">${svc.icon}</div>
-      <h3>${svc.name}</h3>
-      <p class="service-desc">${svc.description}</p>
-      <div class="service-meta">
-        <span>Port ${svc.port}</span>
-        <a href="${svc.url}" target="_blank" rel="noreferrer">Open →</a>
-      </div>
-    `;
-    serviceGrid.appendChild(card);
+
+  // Group by category
+  const grouped = services.reduce((acc, svc) => {
+    (acc[svc.category] = acc[svc.category] || []).push(svc);
+    return acc;
+  }, {});
+
+  for (const [category, items] of Object.entries(grouped)) {
+    const section = document.createElement('div');
+    section.className = 'service-category';
+
+    const heading = document.createElement('h3');
+    heading.className = 'category-heading';
+    heading.textContent = category;
+    section.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'category-grid';
+
+    for (const svc of items) {
+      const card = document.createElement('article');
+      card.className = 'service-card';
+      card.innerHTML = `
+        <div class="service-logo-tag">
+          <img src="logo/Forge.png" alt="ForgeKeeper emblem" />
+        </div>
+        <div class="service-icon">${svc.icon}</div>
+        <h4>${svc.name}</h4>
+        <p class="service-desc">${svc.description}</p>
+        <div class="service-meta">
+          <span>Port ${svc.port}</span>
+          <a href="${svc.url}" target="_blank" rel="noreferrer">Open →</a>
+        </div>
+      `;
+      grid.appendChild(card);
+    }
+
+    section.appendChild(grid);
+    serviceGrid.appendChild(section);
   }
 }
 
