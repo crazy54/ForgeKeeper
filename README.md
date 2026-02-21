@@ -46,6 +46,34 @@
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="logo/Screenshot 2026-02-20 153118.png" alt="ForgeKeeper Portal" width="700" />
+</p>
+
+<p align="center">
+  <img src="logo/Screenshot 2026-02-20 153125.png" alt="ForgeKeeper Portal" width="700" />
+</p>
+
+<p align="center">
+  <img src="logo/Screenshot 2026-02-20 153238.png" alt="ForgeKeeper Portal" width="700" />
+</p>
+
+<p align="center">
+  <img src="logo/Screenshot 2026-02-20 153250.png" alt="ForgeKeeper Portal" width="700" />
+</p>
+
+<p align="center">
+  <img src="logo/Screenshot 2026-02-20 153307.png" alt="ForgeKeeper Portal" width="700" />
+</p>
+
+<p align="center">
+  <img src="logo/Screenshot 2026-02-20 153326.png" alt="ForgeKeeper Portal" width="700" />
+</p>
+
+---
+
 ## Project Structure
 
 ```
