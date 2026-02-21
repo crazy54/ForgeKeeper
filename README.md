@@ -48,28 +48,34 @@
 
 ## Screenshots
 
+**Step 1 — Launch the setup wizard**
 <p align="center">
-  <img src="logo/Screenshot 2026-02-20 153118.png" alt="ForgeKeeper Portal" width="700" />
+  <img src="logo/Screenshot 2026-02-20 153118.png" alt="Setup wizard — step 1" width="700" />
 </p>
 
+**Step 2 — Identity & workspace configuration**
 <p align="center">
-  <img src="logo/Screenshot 2026-02-20 153125.png" alt="ForgeKeeper Portal" width="700" />
+  <img src="logo/Screenshot 2026-02-20 153125.png" alt="Setup wizard — step 2" width="700" />
 </p>
 
+**Step 3 — Language runtime selection**
 <p align="center">
-  <img src="logo/Screenshot 2026-02-20 153238.png" alt="ForgeKeeper Portal" width="700" />
+  <img src="logo/Screenshot 2026-02-20 153238.png" alt="Setup wizard — step 3" width="700" />
 </p>
 
+**Step 4 — Credentials & API keys**
 <p align="center">
-  <img src="logo/Screenshot 2026-02-20 153250.png" alt="ForgeKeeper Portal" width="700" />
+  <img src="logo/Screenshot 2026-02-20 153250.png" alt="Setup wizard — step 4" width="700" />
 </p>
 
+**Step 5 — Build trigger & live log**
 <p align="center">
-  <img src="logo/Screenshot 2026-02-20 153307.png" alt="ForgeKeeper Portal" width="700" />
+  <img src="logo/Screenshot 2026-02-20 153307.png" alt="Setup wizard — step 5" width="700" />
 </p>
 
+**Step 6 — Container ready & portal launch**
 <p align="center">
-  <img src="logo/Screenshot 2026-02-20 153326.png" alt="ForgeKeeper Portal" width="700" />
+  <img src="logo/Screenshot 2026-02-20 153326.png" alt="Setup wizard — step 6" width="700" />
 </p>
 
 ---
