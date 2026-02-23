@@ -1,0 +1,7 @@
+# ForgeKeeper Python Dependencies
+
+# JSON Schema validation for devcontainer.json parsing
+jsonschema>=4.20.0
+
+# Property-based testing framework
+hypothesis>=6.90.0

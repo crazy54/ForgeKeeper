@@ -1,0 +1,4 @@
+services:
+  forgekeeper:
+    build:
+      dockerfile: Dockerfile.built

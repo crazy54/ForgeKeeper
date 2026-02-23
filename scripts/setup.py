@@ -5,14 +5,25 @@ Runs on the HOST before docker build. Collects config, writes .env,
 assembles a custom Dockerfile from selected language modules, then
 triggers docker compose up --build.
 """
+import cgi
 import json
 import os
 import subprocess
 import sys
+import tempfile
 import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+
+# Ensure scripts directory is on sys.path for local imports
+_SCRIPTS_DIR = str(Path(__file__).resolve().parent)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+
+from devcontainer_parser import DevcontainerParser
+from devcontainer_mapper import DevcontainerMapper
+from security_utils import validate_path, validate_file_size
 
 ROOT = Path(__file__).resolve().parent.parent
 SETUP_UI = ROOT / "setup-ui"
@@ -48,6 +59,11 @@ def write_env(config: dict) -> None:
         f'AWS_DEFAULT_REGION={config.get("aws_region", "us-east-1")}',
         f'OLLAMA_MODELS={",".join(config.get("ollama_models", ["llama3"]))}',
     ]
+    # Append imported environment variables
+    imported_env = config.get("imported_env_vars", {})
+    for key, value in imported_env.items():
+        lines.append(f'{key}={value}')
+
     ENV_FILE.write_text("\n".join(lines) + "\n")
     print(f"[setup] Wrote {ENV_FILE}")
 
@@ -179,7 +195,96 @@ class SetupHandler(BaseHTTPRequestHandler):
         except Exception:
             return {}
 
+    def _handle_import_devcontainer(self) -> None:
+        """Handle file upload for devcontainer.json import (multipart form data)."""
+        content_type = self.headers.get("Content-Type", "")
+        if "multipart/form-data" not in content_type:
+            self._send_json(
+                {"success": False, "errors": ["Expected multipart/form-data"]}, 400
+            )
+            return
+
+        # Parse multipart form data
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "CONTENT_TYPE": content_type,
+            "CONTENT_LENGTH": self.headers.get("Content-Length", "0"),
+        }
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ=environ,
+            keep_blank_values=True,
+        )
+
+        file_item = form["file"] if "file" in form else None
+        if file_item is None or not getattr(file_item, "file", None):
+            self._send_json(
+                {"success": False, "errors": ["No file uploaded. Use field name 'file'."]},
+                400,
+            )
+            return
+
+        # Save uploaded content to a temporary file
+        tmp_fd, tmp_path = tempfile.mkstemp(suffix=".json", prefix="devcontainer_")
+        try:
+            try:
+                file_data = file_item.file.read()
+                os.write(tmp_fd, file_data if isinstance(file_data, bytes) else file_data.encode("utf-8"))
+                os.close(tmp_fd)
+            except (IOError, OSError) as e:
+                self._send_json(
+                    {"success": False, "errors": [f"Failed to read uploaded file: {e}"]}, 400
+                )
+                return
+
+            # Parse the devcontainer.json
+            parser = DevcontainerParser()
+            parse_result = parser.parse_file(tmp_path)
+
+            if not parse_result.success:
+                self._send_json(
+                    {"success": False, "errors": parse_result.errors}, 400
+                )
+                return
+
+            # Map features to ForgeKeeper languages
+            mapper = DevcontainerMapper()
+            mapping = mapper.map_features(parse_result.config)
+
+            # Build JSON-serializable response (convert set → sorted list)
+            self._send_json({
+                "success": True,
+                "mapping": {
+                    "languages": sorted(mapping.languages),
+                    "env_vars": mapping.env_vars,
+                    "ports": mapping.ports,
+                    "unrecognized_features": mapping.unrecognized_features,
+                    "warnings": mapping.warnings,
+                },
+            })
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
     def do_POST(self):
+        # Handle multipart upload endpoint before consuming body as JSON
+        if self.path == "/setup/import-devcontainer":
+            try:
+                self._handle_import_devcontainer()
+            except (BrokenPipeError, ConnectionResetError, OSError):
+                pass
+            except Exception as exc:
+                print(f"[setup] POST error ({self.path}): {exc}")
+                try:
+                    self._send_json({"success": False, "errors": [str(exc)]}, 500)
+                except Exception:
+                    pass
+            return
+
         payload = self._read_body()
 
         try:
@@ -188,6 +293,47 @@ class SetupHandler(BaseHTTPRequestHandler):
                 write_env(payload)
                 assemble_dockerfile(selected_langs)
                 self._send_json({"status": "ok", "message": "Config saved. Ready to build."})
+
+            elif self.path == "/setup/import-devcontainer-path":
+                file_path = payload.get("path", "")
+                if not file_path:
+                    self._send_json({"success": False, "errors": ["No path provided"]}, 400)
+                    return
+                # Validate path security
+                if not validate_path(file_path, str(ROOT)):
+                    self._send_json({"success": False, "errors": ["Invalid path: Path traversal is not allowed"]}, 400)
+                    return
+                if not Path(file_path).exists():
+                    self._send_json({"success": False, "errors": [f"File not found: {file_path}"]}, 404)
+                    return
+                try:
+                    if not validate_file_size(file_path):
+                        self._send_json({"success": False, "errors": ["File too large (max 1MB)"]}, 400)
+                        return
+                except PermissionError:
+                    self._send_json({"success": False, "errors": [f"Permission denied reading {file_path}"]}, 403)
+                    return
+                except OSError as e:
+                    self._send_json({"success": False, "errors": [f"Error accessing file {file_path}: {e}"]}, 400)
+                    return
+                # Parse and map
+                parser = DevcontainerParser()
+                result = parser.parse_file(file_path)
+                if not result.success:
+                    self._send_json({"success": False, "errors": result.errors}, 400)
+                    return
+                mapper = DevcontainerMapper()
+                mapping = mapper.map_features(result.config)
+                self._send_json({
+                    "success": True,
+                    "mapping": {
+                        "languages": sorted(mapping.languages),
+                        "env_vars": mapping.env_vars,
+                        "ports": mapping.ports,
+                        "unrecognized_features": mapping.unrecognized_features,
+                        "warnings": mapping.warnings,
+                    },
+                })
 
             elif self.path == "/setup/build":
                 if SetupHandler.build_process and SetupHandler.build_process.poll() is None:
@@ -251,7 +397,10 @@ class SetupHandler(BaseHTTPRequestHandler):
         except Exception as exc:
             print(f"[setup] POST error ({self.path}): {exc}")
             try:
-                self._send_json({"error": str(exc)}, 500)
+                if self.path == "/setup/import-devcontainer-path":
+                    self._send_json({"success": False, "errors": [str(exc)]}, 500)
+                else:
+                    self._send_json({"error": str(exc)}, 500)
             except Exception:
                 pass
 

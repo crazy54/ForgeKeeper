@@ -71,6 +71,20 @@
       <section class="step" id="step-2">
         <h2>Which languages do you need?</h2>
         <p class="step-desc">Only selected runtimes will be compiled into the image — keeping it lean. You can add more later from the portal or CLI.</p>
+        <!-- Import from devcontainer.json -->
+        <div class="import-section" id="import-section">
+          <p class="import-label">Import from devcontainer.json</p>
+          <div class="import-controls">
+            <button class="btn ghost import-btn" id="import-file-btn" type="button">📁 Upload File</button>
+            <input type="file" id="import-file-input" accept=".json" hidden aria-label="Upload devcontainer.json file" />
+            <span class="import-or">or</span>
+            <div class="import-path-group">
+              <input type="text" id="import-path-input" placeholder="/path/to/devcontainer.json" class="import-path-input" aria-label="Path to devcontainer.json" />
+              <button class="btn ghost import-btn" id="import-path-btn" type="button">📂 Load</button>
+            </div>
+          </div>
+          <div id="import-status" class="import-status" role="status" aria-live="polite"></div>
+        </div>
         <div class="lang-grid" id="lang-grid"></div>
       </section>
 
@@ -131,6 +145,33 @@
         <button class="btn ghost" id="back-btn" style="visibility:hidden">← Back</button>
         <button class="btn ghost danger-nav" id="cleanup-btn" style="display:none">🧹 Clean Up</button>
         <button class="btn primary" id="next-btn">Next →</button>
+      </div>
+
+      <!-- Import Preview Modal -->
+      <div id="import-preview-modal" class="modal-overlay" hidden>
+        <div class="modal-content">
+          <h2>Import Preview</h2>
+          <div id="preview-languages" class="preview-section">
+            <h3>Detected Languages</h3>
+            <div id="preview-lang-list" class="preview-lang-list"></div>
+          </div>
+          <div id="preview-env" class="preview-section">
+            <h3>Environment Variables</h3>
+            <pre id="preview-env-list" class="preview-env-list"></pre>
+          </div>
+          <div id="preview-ports" class="preview-section">
+            <h3>Forwarded Ports</h3>
+            <div id="preview-port-list" class="preview-port-list"></div>
+          </div>
+          <div id="preview-warnings" class="preview-section preview-warnings" style="display:none">
+            <h3>⚠️ Warnings</h3>
+            <ul id="preview-warning-list"></ul>
+          </div>
+          <div class="modal-actions">
+            <button class="btn ghost" id="preview-cancel-btn" type="button">Cancel</button>
+            <button class="btn primary" id="preview-apply-btn" type="button">Apply</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

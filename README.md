@@ -139,6 +139,104 @@ Resetting the container wipes `.setup-complete` so the wizard runs again on next
 
 ---
 
+## Importing from devcontainer.json
+
+Already have a `devcontainer.json`? ForgeKeeper can import it to auto-detect your language runtimes, environment variables, and forwarded ports — no manual selection needed.
+
+### How it works
+
+The import option appears on **Step 2 (Language Selection)** of the setup wizard in both Flow A and Flow B. You can either upload a file or point to a path on disk.
+
+**File upload** — click the upload button and select your `.json` file.
+
+**Path import** — enter the path to your `devcontainer.json` (e.g. `/workspaces/.devcontainer/devcontainer.json` in Flow B) and click Load.
+
+After import, a preview modal shows what was detected. You can review and edit the selections before applying them to the wizard.
+
+### What gets imported
+
+| Property | Source in devcontainer.json | How it's used |
+|---|---|---|
+| Language runtimes | `features` + `image` | Pre-selects languages in the wizard grid |
+| Environment variables | `remoteEnv` | Written to `.env` (Flow A) or `/etc/forgekeeper/env` (Flow B) |
+| Forwarded ports | `forwardPorts` | Documented for reference; validated (1–65535) |
+| Unrecognized features | Any feature not in the mapping table | Shown as warnings in the preview |
+
+### Supported language mappings
+
+ForgeKeeper recognizes these devcontainer feature patterns:
+
+| ForgeKeeper Runtime | Devcontainer Feature Prefixes |
+|---|---|
+| `python` | `ghcr.io/devcontainers/features/python`, `ghcr.io/devcontainers-contrib/features/python` |
+| `node` | `ghcr.io/devcontainers/features/node`, `ghcr.io/devcontainers-contrib/features/node` |
+| `go` | `ghcr.io/devcontainers/features/go`, `ghcr.io/devcontainers-contrib/features/go` |
+| `rust` | `ghcr.io/devcontainers/features/rust`, `ghcr.io/devcontainers-contrib/features/rust` |
+| `java` | `ghcr.io/devcontainers/features/java`, `ghcr.io/devcontainers-contrib/features/java` |
+| `dotnet` | `ghcr.io/devcontainers/features/dotnet`, `ghcr.io/microsoft/devcontainers/features/dotnet` |
+| `ruby` | `ghcr.io/devcontainers/features/ruby`, `ghcr.io/devcontainers-contrib/features/ruby` |
+| `php` | `ghcr.io/devcontainers/features/php`, `ghcr.io/devcontainers-contrib/features/php` |
+
+Languages are also detected from the base `image` name (e.g. `python:3.11` → python, `node:20` → node).
+
+### Example devcontainer.json
+
+```json
+{
+  "name": "My Project",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12" },
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
+    "ghcr.io/devcontainers/features/go:1": { "version": "1.22" },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [3000, 8080, 5432],
+  "remoteEnv": {
+    "APP_ENV": "development",
+    "DATABASE_URL": "postgresql://localhost:5432/mydb"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "golang.go"]
+    }
+  }
+}
+```
+
+Importing this file would:
+- Pre-select **python**, **node**, and **go** in the language grid
+- Set `APP_ENV` and `DATABASE_URL` as environment variables
+- List ports 3000, 8080, and 5432 in the preview
+- Flag `docker-in-docker` as an unrecognized feature (Docker is pre-installed in ForgeKeeper)
+
+### API endpoints
+
+**Flow A** (pre-build wizard on host, port 7001):
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/setup/import-devcontainer` | Upload a devcontainer.json file (multipart form data) |
+| `POST` | `/setup/import-devcontainer-path` | Import from a file path (JSON body: `{"path": "..."}`) |
+
+**Flow B** (first-run wizard inside container, port 7000):
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/forgekeeper/import-devcontainer` | Upload a devcontainer.json file (multipart form data) |
+| `POST` | `/forgekeeper/import-devcontainer-path` | Import from a file path (JSON body: `{"path": "..."}`) |
+
+Both endpoints return JSON with `success`, `mapping` (languages, env_vars, ports, warnings), and `errors` fields.
+
+### Security
+
+- File uploads are limited to 1 MB
+- Path imports are validated against path traversal attacks
+- Sensitive environment variables (containing `token`, `key`, `secret`, `password`, etc.) are masked in the preview
+- Port numbers are validated to the 1–65535 range
+
+---
+
 - [ForgeKeeper](#forgekeeper)
   - [Table of Contents](#table-of-contents)
   - [Vision \& Pillars](#vision--pillars)

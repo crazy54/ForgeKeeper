@@ -1,0 +1,15 @@
+# ForgeKeeper Development Dependencies
+
+# Include base requirements
+-r requirements.txt
+
+# Testing framework
+pytest>=7.4.0
+
+# Property-based testing (also needed for dev)
+hypothesis>=6.90.0
+
+# Code quality tools
+pylint>=3.0.0
+black>=23.0.0
+mypy>=1.7.0

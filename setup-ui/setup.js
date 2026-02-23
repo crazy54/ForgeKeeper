@@ -218,6 +218,8 @@ function collectConfig() {
     anthropic_key: document.getElementById('anthropic_key')?.value.trim() || '',
     aws_region:    document.getElementById('aws_region')?.value.trim() || 'us-east-1',
     languages:     [...selectedLangs],
+    imported_env_vars: importedEnvVars,
+    imported_ports: importedPorts,
   };
 }
 
@@ -588,6 +590,201 @@ function bindEnterKey() {
   }
 }
 bindEnterKey();
+
+// ── Devcontainer Import ───────────────────────────────────────────────────────
+let importedEnvVars = {};
+let importedPorts = [];
+let lastImportMapping = null;
+
+// Sensitive key patterns for masking env var values in preview
+const SENSITIVE_PATTERNS = ['token', 'key', 'secret', 'password', 'credential', 'api_key', 'auth', 'private'];
+
+function isSensitiveKey(key) {
+  const lower = key.toLowerCase();
+  return SENSITIVE_PATTERNS.some(p => lower.includes(p));
+}
+
+function maskValue(value) {
+  if (value.length <= 4) return '***';
+  return value.slice(0, 2) + '***' + value.slice(-2);
+}
+
+function setImportStatus(message, type = '') {
+  const el = document.getElementById('import-status');
+  el.textContent = message;
+  el.className = 'import-status' + (type ? ' ' + type : '');
+}
+
+async function handleFileUpload(file) {
+  setImportStatus('Importing…', 'loading');
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const endpoint = MODE === 'portal'
+    ? '/forgekeeper/import-devcontainer'
+    : `${API_BASE}/setup/import-devcontainer`;
+
+  try {
+    const res = await fetch(endpoint, { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.success) {
+      setImportStatus('Import successful!', 'success');
+      showImportPreview(data.mapping);
+    } else {
+      showImportError(data.errors || ['Import failed']);
+    }
+  } catch (err) {
+    showImportError([`Network error: ${err.message}`]);
+  }
+}
+
+async function handlePathImport(path) {
+  if (!path.trim()) {
+    showImportError(['Please enter a file path']);
+    return;
+  }
+  setImportStatus('Importing…', 'loading');
+
+  const endpoint = MODE === 'portal'
+    ? '/forgekeeper/import-devcontainer-path'
+    : `${API_BASE}/setup/import-devcontainer-path`;
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      setImportStatus('Import successful!', 'success');
+      showImportPreview(data.mapping);
+    } else {
+      showImportError(data.errors || ['Import failed']);
+    }
+  } catch (err) {
+    showImportError([`Network error: ${err.message}`]);
+  }
+}
+
+function showImportPreview(mapping) {
+  lastImportMapping = mapping;
+  const modal = document.getElementById('import-preview-modal');
+
+  // Languages
+  const langList = document.getElementById('preview-lang-list');
+  langList.innerHTML = '';
+  if (mapping.languages.length === 0) {
+    langList.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem">No languages detected</span>';
+  } else {
+    for (const lang of mapping.languages) {
+      const tag = document.createElement('span');
+      tag.className = 'preview-lang-tag';
+      const info = LANGS.find(l => l.id === lang);
+      tag.textContent = info ? `${info.emoji} ${info.name}` : lang;
+      langList.appendChild(tag);
+    }
+  }
+
+  // Environment variables
+  const envList = document.getElementById('preview-env-list');
+  const envEntries = Object.entries(mapping.env_vars || {});
+  if (envEntries.length === 0) {
+    envList.textContent = 'No environment variables';
+  } else {
+    envList.textContent = envEntries.map(([k, v]) => {
+      const displayVal = isSensitiveKey(k) ? maskValue(v) : v;
+      return `${k}=${displayVal}`;
+    }).join('\n');
+  }
+
+  // Ports
+  const portList = document.getElementById('preview-port-list');
+  portList.innerHTML = '';
+  if ((mapping.ports || []).length === 0) {
+    portList.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem">No ports</span>';
+  } else {
+    for (const port of mapping.ports) {
+      const tag = document.createElement('span');
+      tag.className = 'preview-port-tag';
+      tag.textContent = port;
+      portList.appendChild(tag);
+    }
+  }
+
+  // Warnings
+  const warningsSection = document.getElementById('preview-warnings');
+  const warningList = document.getElementById('preview-warning-list');
+  warningList.innerHTML = '';
+  if ((mapping.warnings || []).length > 0) {
+    warningsSection.style.display = '';
+    for (const w of mapping.warnings) {
+      const li = document.createElement('li');
+      li.textContent = w;
+      warningList.appendChild(li);
+    }
+  } else {
+    warningsSection.style.display = 'none';
+  }
+
+  modal.hidden = false;
+}
+
+function applyImport() {
+  if (!lastImportMapping) return;
+  const mapping = lastImportMapping;
+
+  // Update selected languages
+  for (const lang of mapping.languages) {
+    selectedLangs.add(lang);
+  }
+  renderLangGrid();
+
+  // Store imported env vars and ports for later use
+  importedEnvVars = { ...importedEnvVars, ...(mapping.env_vars || {}) };
+  importedPorts = [...new Set([...importedPorts, ...(mapping.ports || [])])];
+
+  // Close modal
+  document.getElementById('import-preview-modal').hidden = true;
+  setImportStatus(`Applied: ${mapping.languages.length} language(s), ${Object.keys(mapping.env_vars || {}).length} env var(s), ${(mapping.ports || []).length} port(s)`, 'success');
+}
+
+function showImportError(errors) {
+  const message = errors.join('; ');
+  setImportStatus(message, 'error');
+}
+
+// Wire up import UI event listeners
+document.getElementById('import-file-btn')?.addEventListener('click', () => {
+  document.getElementById('import-file-input')?.click();
+});
+
+document.getElementById('import-file-input')?.addEventListener('change', (e) => {
+  const file = e.target.files?.[0];
+  if (file) handleFileUpload(file);
+  e.target.value = ''; // reset so same file can be re-selected
+});
+
+document.getElementById('import-path-btn')?.addEventListener('click', () => {
+  const path = document.getElementById('import-path-input')?.value || '';
+  handlePathImport(path);
+});
+
+document.getElementById('import-path-input')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('import-path-btn')?.click();
+  }
+});
+
+document.getElementById('preview-cancel-btn')?.addEventListener('click', () => {
+  document.getElementById('import-preview-modal').hidden = true;
+  setImportStatus('Import cancelled', '');
+});
+
+document.getElementById('preview-apply-btn')?.addEventListener('click', () => {
+  applyImport();
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderLangGrid();

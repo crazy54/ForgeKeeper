@@ -3,11 +3,23 @@
 ForgeKeeper Portal Server
 Serves the portal UI and exposes control, setup, and runtime management endpoints.
 """
+import cgi
 import json
 import os
 import subprocess
+import sys
+import tempfile
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+
+# Add scripts directory to path for parser/mapper imports
+_SCRIPTS_DIR = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+
+from devcontainer_parser import DevcontainerParser
+from devcontainer_mapper import DevcontainerMapper
+from security_utils import validate_path, validate_file_size
 
 # ROOT is always the portal/ directory, regardless of CWD
 ROOT = Path(__file__).resolve().parent
@@ -141,6 +153,10 @@ class ForgeKeeperHandler(SimpleHTTPRequestHandler):
             self._handle_setup()
         elif path == "/forgekeeper/runtime":
             self._handle_runtime()
+        elif path == "/forgekeeper/import-devcontainer":
+            self._handle_import_devcontainer()
+        elif path == "/forgekeeper/import-devcontainer-path":
+            self._handle_import_devcontainer_path()
         else:
             self.send_error(404, "Not Found")
 
@@ -179,6 +195,12 @@ class ForgeKeeperHandler(SimpleHTTPRequestHandler):
                 f'ANTHROPIC_API_KEY={payload.get("anthropic_key", "")}',
                 f'AWS_DEFAULT_REGION={payload.get("aws_region", "us-east-1")}',
             ]
+
+            # Append imported environment variables
+            imported_env = payload.get("imported_env_vars", {})
+            for key, value in imported_env.items():
+                lines.append(f'{key}={value}')
+
             ENV_FILE.write_text("\n".join(lines) + "\n")
 
             # Source env into new shell sessions
@@ -239,6 +261,126 @@ class ForgeKeeperHandler(SimpleHTTPRequestHandler):
                 "installed": (LANG_STATE_DIR / f"{lang}.installed").exists(),
             })
         _send_json(self, {"langs": langs})
+
+    def _handle_import_devcontainer(self) -> None:
+        """Handle file upload for devcontainer.json import (multipart form data)."""
+        content_type = self.headers.get("Content-Type", "")
+        if "multipart/form-data" not in content_type:
+            _send_json(
+                self, {"success": False, "errors": ["Expected multipart/form-data"]}, 400
+            )
+            return
+
+        # Parse multipart form data
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "CONTENT_TYPE": content_type,
+            "CONTENT_LENGTH": self.headers.get("Content-Length", "0"),
+        }
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ=environ,
+            keep_blank_values=True,
+        )
+
+        file_item = form["file"] if "file" in form else None
+        if file_item is None or not getattr(file_item, "file", None):
+            _send_json(
+                self,
+                {"success": False, "errors": ["No file uploaded. Use field name 'file'."]},
+                400,
+            )
+            return
+
+        # Save uploaded content to a temporary file in /tmp
+        tmp_fd, tmp_path = tempfile.mkstemp(suffix=".json", prefix="devcontainer_")
+        try:
+            try:
+                file_data = file_item.file.read()
+                os.write(tmp_fd, file_data if isinstance(file_data, bytes) else file_data.encode("utf-8"))
+                os.close(tmp_fd)
+            except (IOError, OSError) as e:
+                _send_json(
+                    self, {"success": False, "errors": [f"Failed to read uploaded file: {e}"]}, 400
+                )
+                return
+
+            # Parse the devcontainer.json
+            parser = DevcontainerParser()
+            parse_result = parser.parse_file(tmp_path)
+
+            if not parse_result.success:
+                _send_json(
+                    self, {"success": False, "errors": parse_result.errors}, 400
+                )
+                return
+
+            # Map features to ForgeKeeper languages
+            mapper = DevcontainerMapper()
+            mapping = mapper.map_features(parse_result.config)
+
+            # Build JSON-serializable response (convert set → sorted list)
+            _send_json(self, {
+                "success": True,
+                "mapping": {
+                    "languages": sorted(mapping.languages),
+                    "env_vars": mapping.env_vars,
+                    "ports": mapping.ports,
+                    "unrecognized_features": mapping.unrecognized_features,
+                    "warnings": mapping.warnings,
+                },
+            })
+        except Exception as exc:
+            _log(f"Import devcontainer error: {exc}")
+            _send_json(
+                self, {"success": False, "errors": [f"Import failed: {exc}"]}, 500
+            )
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+    def _handle_import_devcontainer_path(self) -> None:
+        """Handle path-based devcontainer.json import for portal (Flow B)."""
+        payload = _read_body(self)
+        file_path = payload.get("path", "")
+        if not file_path:
+            _send_json(self, {"success": False, "errors": ["No path provided"]}, 400)
+            return
+        if not Path(file_path).exists():
+            _send_json(self, {"success": False, "errors": [f"File not found: {file_path}"]}, 404)
+            return
+        try:
+            if not validate_file_size(file_path):
+                _send_json(self, {"success": False, "errors": ["File too large (max 1MB)"]}, 400)
+                return
+        except (PermissionError, OSError) as e:
+            _send_json(self, {"success": False, "errors": [f"Error accessing file: {e}"]}, 400)
+            return
+
+        parser = DevcontainerParser()
+        result = parser.parse_file(file_path)
+        if not result.success:
+            _send_json(self, {"success": False, "errors": result.errors}, 400)
+            return
+
+        mapper = DevcontainerMapper()
+        mapping = mapper.map_features(result.config)
+        _send_json(self, {
+            "success": True,
+            "mapping": {
+                "languages": sorted(mapping.languages),
+                "env_vars": mapping.env_vars,
+                "ports": mapping.ports,
+                "unrecognized_features": mapping.unrecognized_features,
+                "warnings": mapping.warnings,
+            },
+        })
+
+
 
     def _serve_file(self, path: Path) -> None:
         """Serve a file with proper MIME type and pipe-safe response."""
